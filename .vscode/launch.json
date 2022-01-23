@@ -6,6 +6,20 @@
    "configurations": [
       {
          "type": "java",
+         "name": "Launch ClientMain",
+         "request": "launch",
+         "mainClass": "ClientMain",
+         "projectName": "WINSOME_bcd4babe"
+      },
+      {
+         "type": "java",
+         "name": "Launch ServerMain",
+         "request": "launch",
+         "mainClass": "ServerMain",
+         "projectName": "WINSOME_bcd4babe"
+      },
+      {
+         "type": "java",
          "name": "Server",
          "request": "launch",
          "mainClass": "${workspaceFolder}/src/ServerMain.java",
