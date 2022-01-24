@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -53,10 +54,11 @@ public class ServerManager {
       return removeUserLogged(clientChannel);
 
    }
-   public static boolean createPost(String title, String content, User author) {
+   public static Post createPost(String title, String content, User author) {
       Post post = new Post(database.getPreviousMaxPostID()+1, author, title, content);
       database.addPost(author, post);
-      return true;
+      database.saveDatabase();
+      return post;
 
    }
    public static boolean deletePost(Post post) {
@@ -84,47 +86,54 @@ public class ServerManager {
    public static User getUserLogged(SocketChannel clientChannel) {
       return usersLogged.get(clientChannel);
    }
-   public static boolean followUser(User u, String usernameToFollow) {
+   public static int followUser(User u, String usernameToFollow) {
       User userToFollow = database.findUserByUsername(usernameToFollow);
+      if (userToFollow == null) return USER_NOT_FOUND.getCode();
       u.getFollowing().add(userToFollow);
       userToFollow.getFollowers().add(u);
-      return true;
+      return OK.getCode();
    }
-   public static boolean unfollowUser(User u, String usernameToUnfollow) {
+   public static int unfollowUser(User u, String usernameToUnfollow) {
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
-      u.getFollowing().remove(userToUnfollow);
-      userToUnfollow.getFollowers().remove(u);
-      return true;
+      if (userToUnfollow == null) return USER_NOT_FOUND.getCode();
+      if (u.getFollowing().remove(userToUnfollow) && userToUnfollow.getFollowers().remove(u))
+         return OK.getCode();
+      return NO_EFFECT.getCode();
    }
 
-   public static boolean addComment(User u, Post post, String content) {
+   public static int addComment(User u, Post post, String content) {
+      if (post == null) return POST_NOT_FOUND.getCode();
+
       Comment comment = new Comment(u, content);
       post.getCommentsList().add(comment);
-      return true;
+      return OK.getCode();
    }
 
-   public static boolean rewinPost(User u, Post post) {
+   public static int rewinPost(User u, Post post) {
+      if (post == null) return POST_NOT_FOUND.getCode();
+
       database.addPost(u, post);
       post.getRewinList().add(u);
-      return true;
+      return OK.getCode();
    }
 
-   public static String ratePost(User u, Post post, int vote) {
+   public static int ratePost(User u, Post post, int vote) {
       if (post.getAuthor().equals(u))
-         return RATE_OWN_POST;
+         return RATE_OWN_POST.getCode();
       if (post.getLikersList().contains(u) || post.getDislikersList().contains(u))
-         return ALREADY_RATED;
+         return ALREADY_RATED.getCode();
       if (!database.getUserPosts(u).contains(post))
-         return RATE_BEFORE_REWIN;
+         return RATE_BEFORE_REWIN.getCode();
       switch (vote) {
       case 1:
-         post.getLikersList().add(u);
+         post.getLikersList().add(u); break;
       case -1:
-         post.getDislikersList().add(u);
+         post.getDislikersList().add(u); break;
       default:
-         return OK;
+         return ILLEGAL_OPERATION.getCode();
+         }
+      return OK.getCode();
       }
-   }
 
    public static double getWalletAmount(User u) {
       return u.getCurrentCompensation();
@@ -133,6 +142,7 @@ public class ServerManager {
 
    public static double getBTCValue() {
       String randomURL = "https://www.random.org/decimal-fractions/?num=1&dec=5&col=2&format=plain&rnd=new";
+      StringBuilder stringBuilder = new StringBuilder();
       try {
           String encoding = "ISO-8859-1";
           URL u = new URL(randomURL);
@@ -145,20 +155,18 @@ public class ServerManager {
           InputStream in = new BufferedInputStream(uc.getInputStream());
           Reader r = new InputStreamReader(in, encoding);
           int c;
-          StringBuilder stringBuilder = new StringBuilder();
           while ((c = r.read()) != -1) {
               stringBuilder.append((char) c);
           }
           r.close();
-          return Double.parseDouble(stringBuilder.toString());
          }
          catch (Exception e) {
             e.printStackTrace();
-            return 0;
          }
+          return Double.parseDouble(stringBuilder.toString());
 
    }
-   public static String listUsers(User u) {
+   public static HashSet<String> listUsers(User u) {
       LinkedList<String> userTags = u.getTags();
       HashSet<String> returnSet = new HashSet<>();
       Iterator<String> itr1 = userTags.iterator();
@@ -168,15 +176,16 @@ public class ServerManager {
          while (itr2.hasNext())
             returnSet.add(itr2.next().getUsername());
       }
-      StringBuilder string = new StringBuilder();
-      Iterator<String> itr3 = returnSet.iterator();
-      while (itr3.hasNext()) {
-         string.append(itr3.next() + "\n");
-      }
          
-      return string.toString();
+      return returnSet;
 
    }
-
+   public static LinkedList<Post> showFeed(User u) {
+      LinkedList<Post> feedList = new LinkedList<>();
+      for (User followingUser: u.getFollowing())
+      feedList.addAll(database.getUserPosts(followingUser));
+      Collections.shuffle(feedList);
+      return feedList;
+   }
 
 }

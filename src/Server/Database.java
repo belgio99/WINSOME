@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.Collection;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentMap;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,6 +21,7 @@ import Server.utils.User;
 
 public class Database {
    private final ConcurrentHashMap<User, LinkedList<Post>> database;
+   private final ConcurrentHashMap<String, User> userDB;
    private final ConcurrentLinkedDeque<Post> postList;
    private final ConcurrentHashMap<String, LinkedList<User>> globalTagsList;
 /*    private final ConcurrentHashMap<String, LinkedList<Post>> trash;
@@ -36,10 +34,12 @@ public class Database {
       database = new ConcurrentHashMap<>();
       postList = new ConcurrentLinkedDeque<>();
       globalTagsList = new ConcurrentHashMap<>();
+      userDB = new ConcurrentHashMap<>();
       //trash = new ConcurrentHashMap<>();
       //usersLogged = new ConcurrentHashMap<>();
 
       gson = new GsonBuilder().setPrettyPrinting().create();
+      loadDatabase();
       
 
       File dbfolder = new File(DefaultValues.serverval.databasePath);
@@ -52,11 +52,13 @@ public class Database {
       
 
    }
+
    public void loadDatabase() {
-      try {
-      gson.fromJson(new FileReader(DefaultValues.serverval.databasePath + "\\database.json"), database.getClass());
+      try (FileReader reader = new FileReader(DefaultValues.serverval.databasePath+"/database.json")) {
+         gson.fromJson(reader, database.getClass());
+         //gson.fromJson(reader, postList.getClass());
       }
-      catch (FileNotFoundException e) {
+      catch (Exception e) {
          e.printStackTrace();
       }
    }
@@ -70,6 +72,8 @@ public class Database {
             globalTagsList.putIfAbsent(newTag, new LinkedList<User>());
             globalTagsList.get(newTag).add(newUser);
          }
+         userDB.putIfAbsent(username, newUser);
+         saveDatabase();
          return (database.putIfAbsent(newUser, new LinkedList<Post>()) == null) ? true: false;
       }
 
@@ -89,11 +93,21 @@ public class Database {
    
 
 
-   public boolean updateJSON() {
-      try {
-      gson.toJson(database, new FileWriter(DefaultValues.serverval.databasePath+"/database.json"));
-      return true;
+   public boolean saveDatabase() {
+      try (FileWriter writer = new FileWriter(DefaultValues.serverval.databasePath+"/database.json")){
+         gson.toJson(database, writer);
+         writer.flush();
+      } 
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         return false;
       }
+      try (FileWriter writer2 = new FileWriter(DefaultValues.serverval.databasePath+"/userdb.json")){
+         gson.toJson(database, writer2);
+         writer2.flush();
+      }
+      
       /*try (FileWriter writer = new FileWriter(DefaultValues.serverval.databasePath+"/database.json")) {
          gson.toJson(database, writer);
          return true;
@@ -103,6 +117,7 @@ public class Database {
          e.printStackTrace();
          return false;
       }
+      return true;
    }
    /*public User loginUser(String username, String password) {
       return findUserByUsername(username);

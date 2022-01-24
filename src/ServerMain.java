@@ -8,6 +8,7 @@ import java.nio.channels.SocketChannel;
 import java.rmi.AlreadyBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,14 +16,13 @@ import java.util.concurrent.Executors;
 import Server.ServerManager;
 import Server.Configs.DefaultValues;
 import Server.RMI.RegistrationService;
-import Server.utils.Message;
 
 public class ServerMain {
 
    
    
-   private static ByteBuffer buffer;
-   private static final int port = 10000;
+   //private static ByteBuffer buffer;
+   //private static final int port = 10000;
    public static ServerSocketChannel serverSocketChannel;
 
    public static void main(String[] args) {
@@ -36,7 +36,7 @@ public class ServerMain {
          
          serverSocketChannel.configureBlocking(false);
          serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-         buffer = ByteBuffer.allocate(1024);
+         //buffer = ByteBuffer.allocate(1024);
          String multicastAddress = DefaultValues.serverval.multicastAddress + ":" + DefaultValues.serverval.multicastPort;
          ByteBuffer multicastBuffer = ByteBuffer.wrap(multicastAddress.getBytes());
          
@@ -47,7 +47,26 @@ public class ServerMain {
          //Registry r2 = LocateRegistry.createRegistry(DefaultValues.client.RMIPort);
          //Mettere il follow service
 
-         
+         Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+               Selector selector = ServerManager.getSelector();
+               System.out.println("Esco!");
+               
+                try {
+                     selector.close();
+                     serverSocketChannel.close();
+                     UnicastRemoteObject.unexportObject(regService, false);
+                     r1.unbind(DefaultValues.serverval.RMIName);
+                    Thread.sleep(200);
+                    System.out.println("Shutting down ...");
+                    //some cleaning up code...
+    
+                } catch (Exception e) {
+                    Thread.currentThread().interrupt();
+                    e.printStackTrace();
+                }
+            }
+        });
 
 
 
@@ -64,24 +83,29 @@ public class ServerMain {
       System.out.println("Server pronto");
       try {
          System.out.println("Attesa nel select...");
-      while (selector.select() != 0) {
+      while (true) {
+         while (selector.select()==0) {
+            continue;
+         }
          System.out.println("Ricevuta nuova chiave!");
             Set<SelectionKey> selectedKS = selector.selectedKeys();
             for (SelectionKey key : selectedKS) {
-               System.out.println("La chiave è di tipo" + key.toString());
+               //System.out.println("La chiave è di tipo" + key.toString());
                if (key.isAcceptable()) {
+                  System.out.println("La chiave è di tipo ACCEPT");
                   SocketChannel connectedClient = serverSocketChannel.accept();
                   connectedClient.configureBlocking(false);
                   connectedClient.register(selector, SelectionKey.OP_READ);
                   System.out.println("Nuovo client connesso a " + connectedClient.getRemoteAddress().toString());
                } else if (key.isReadable()) {
+                  System.out.println("La chiave è di tipo READ");
                   SocketChannel client = (SocketChannel) key.channel();
                   ServerRequestHandler request = new ServerRequestHandler(client,selector);
                   key.cancel();
                   updateKeySet(selector);
                   threadPool.submit(new Thread(request));
                   //int command = readCommand(client, buffer);
-               } else if (key.isWritable()) {
+               } /*else if (key.isWritable()) {
                   SocketChannel client = (SocketChannel) key.channel();
                   Message response = (Message) key.attachment();
                   ServerRequestResponder writer = new ServerRequestResponder(client, response);
@@ -89,15 +113,13 @@ public class ServerMain {
                   updateKeySet(selector);
                   threadPool.submit(new Thread(writer));
                   // Invio la risposta
-               }
+               }*/
 
                selectedKS.remove(key);
             }
             System.out.println("Torno al select...");
          }
-         System.out.println("Esco!");
-         selector.close();
-         serverSocketChannel.close();
+         
       }
       
          catch (IOException e) {
@@ -105,6 +127,7 @@ public class ServerMain {
             //continue;
          }
       }
+      
       private static void updateKeySet(Selector selector) {
          try {
              selector.selectNow();
