@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import Server.RMI.FollowService.CallbackService;
 import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.User;
@@ -27,6 +28,7 @@ public class ServerManager {
    //private static final Gson gson = new Gson();
    private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
    private static final Database database = new Database(analyzeList);
+   private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>();
    private static final RewardCalculator r1;
    
    private static Selector selector;
@@ -204,5 +206,15 @@ public class ServerManager {
       r1.shutdown();
       database.saveDatabase();
    }
+   public static void addCallback(String username, CallbackService service) {
+      callbacksMap.put(username, service);
+  }
+
+  public static void removeCallback(String username, CallbackService service) {
+      if (username == null) return;
+
+      callbacksMap.remove(username, service);
+  }
+
 
 }

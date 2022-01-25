@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 
 import Server.ServerManager;
 import Server.Configs.DefaultValues;
-import Server.RMI.RegistrationService;
+import Server.RMI.Registration.RegistrationService;
 
 public class ServerMain {
 

@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import Server.Configs.DefaultValues;
-import Server.RMI.RegistrationServerInterface;
 import Server.utils.ResultCode;
 
 import static Server.utils.ResultCode.*;
