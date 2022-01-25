@@ -4,12 +4,13 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import Server.ServerManager;
 import static Server.utils.ResultCode.*;
@@ -307,17 +308,29 @@ public class ServerRequestHandler implements Runnable {
       return ServerManager.ratePost(u, post, vote);
    }
 
-   private int getWallet(User u) {
-      Double amount = u.getCurrentCompensation();
-      LinkedBlockingQueue<Transaction> transactionList = u.getWincoinList();
-      //for (Transaction t : u.getWincoinList())
+   private int getWallet(User u) throws IOException {
+      //Double amount = u.getCurrentCompensation();
+      double sum = 0;
+      for (Transaction t : u.getWincoinList()) {
+         sum = sum + t.getWinCoin();
+         sendString(clientChannel, String.valueOf(t.getWinCoin()));
+         LocalDateTime datetime = LocalDateTime.ofInstant(t.getTimestamp(), ZoneOffset.UTC);
+         String formatted = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss").format(datetime);
+         sendString(clientChannel, formatted);
+      }
+      sendString(clientChannel, String.valueOf(sum));
          
       return 0;
    }
 
-   private int getWalletBTC(User u) {
-      Double amount = ServerManager.getBTCValue();
-      return 0;
+   private int getWalletBTC(User u) throws IOException {
+      Double BTCValue = ServerManager.getBTCValue();
+      double sum = 0;
+      for (Transaction t : u.getWincoinList()) {
+         sum = sum + t.getWinCoin();
+      }
+      sendInt(clientChannel, (int)Math.round(BTCValue*sum));
+      return OK.getCode();
    }
 
    private int listUsers(User u) throws IOException {

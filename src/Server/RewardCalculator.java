@@ -1,7 +1,6 @@
 package Server;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +27,7 @@ public class RewardCalculator extends ScheduledThreadPoolExecutor {
   }
 
   public void startAnalyzing() {
-     ScheduledFuture<?> f = scheduleAtFixedRate(new RewardCalculatorThread(analyzeList), n, n, unit);
+     scheduleAtFixedRate(new RewardCalculatorThread(analyzeList), n, n, unit);
   }
 
   //public void stopA

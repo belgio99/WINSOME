@@ -27,6 +27,7 @@ public class ServerManager {
    //private static final Gson gson = new Gson();
    private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
    private static final Database database = new Database(analyzeList);
+   private static final RewardCalculator r1;
    
    private static Selector selector;
    private static final ConcurrentHashMap<SocketChannel, User> usersLogged = new ConcurrentHashMap<>();
@@ -39,7 +40,7 @@ public class ServerManager {
       catch (IOException e) {
          e.printStackTrace();
       }
-      RewardCalculator r1 = new RewardCalculator(analyzeList);
+      r1 = new RewardCalculator(analyzeList);
    }
 
    public static boolean register(String username, String password, LinkedList<String> tagsList) {
@@ -200,6 +201,7 @@ public class ServerManager {
    public static void shutdown() {
       for (SocketChannel cc : usersLogged.keySet())
          logoutUser(cc);
+      r1.shutdown();
       database.saveDatabase();
    }
 
