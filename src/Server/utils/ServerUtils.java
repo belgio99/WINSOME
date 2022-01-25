@@ -1,11 +1,15 @@
 package Server.utils;
+
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.BitSet;
 
-import Server.ServerManager;
+import Server.Configs.DefaultValues;
 
 public class ServerUtils {
 
@@ -50,7 +54,7 @@ public class ServerUtils {
 
   }
     public static boolean stringChecker(String str) {
-        if (str.isEmpty() || str.trim().length()==0 || str.isBlank())
+        if (str.isEmpty() || str.trim().length()==0 || str.trim().isEmpty())
             return true;
         return false;
     }
@@ -64,4 +68,17 @@ public class ServerUtils {
         }
         return splitted;
      }
+     
+     public synchronized static void sendUDPMessage(String message) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            InetAddress address = InetAddress.getByName(DefaultValues.serverval.multicastAddress);
+            int port = DefaultValues.serverval.multicastPort;
+            DatagramPacket packet = new DatagramPacket(message.getBytes(), message.length(), address, port);
+            socket.send(packet);
+            socket.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }

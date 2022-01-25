@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import Server.ServerManager;
 import static Server.utils.ResultCode.*;
@@ -308,7 +309,9 @@ public class ServerRequestHandler implements Runnable {
 
    private int getWallet(User u) {
       Double amount = u.getCurrentCompensation();
-      LinkedList<Transaction> transactionList = u.getWincoinList();
+      LinkedBlockingQueue<Transaction> transactionList = u.getWincoinList();
+      //for (Transaction t : u.getWincoinList())
+         
       return 0;
    }
 

@@ -1,6 +1,7 @@
 package Server.utils;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Post {
@@ -11,10 +12,12 @@ public class Post {
    private transient User author;
    private String authorUsername;
    private ConcurrentLinkedQueue<Comment> commentsList;
-   private ConcurrentLinkedQueue<User> likersList;
-   private ConcurrentLinkedQueue<User> dislikersList;
-   private Instant timestamp;
+   private LinkedHashMap<User, Instant> likersList;
+   private LinkedHashMap<User, Instant> dislikersList;
+   private Instant creationTimestamp;
+   private Instant lastUpdateTimestamp;
    private ConcurrentLinkedQueue<User> rewinList;
+   private int numIterations;
    
    
 
@@ -25,100 +28,32 @@ public class Post {
       this.content = content;
       this.author = author;
       authorUsername = author.getUsername();
-      timestamp = Instant.now();
+      creationTimestamp = Instant.now();
       commentsList = new ConcurrentLinkedQueue<>();
-      likersList = new ConcurrentLinkedQueue<>();
-      dislikersList = new ConcurrentLinkedQueue<>();
+      likersList = new LinkedHashMap<>();
+      dislikersList = new LinkedHashMap<>();
       rewinList = new ConcurrentLinkedQueue<>();
+      numIterations = 0;
+      lastUpdateTimestamp = creationTimestamp;
 
+      
       
 
    }
 
-   public Post() {
+   public User getAuthor() {
+      return this.author;
    }
 
-   public Post(int IDPost, String title, String content, User author, ConcurrentLinkedQueue<Comment> commentsList, ConcurrentLinkedQueue<User> likersList, ConcurrentLinkedQueue<User> dislikersList, Instant timestamp, ConcurrentLinkedQueue<User> rewinList) {
-      this.IDPost = IDPost;
-      this.title = title;
-      this.content = content;
+   public void setAuthor(User author) {
       this.author = author;
-      this.commentsList = commentsList;
-      this.likersList = likersList;
-      this.dislikersList = dislikersList;
-      this.timestamp = timestamp;
-      this.rewinList = rewinList;
    }
 
-   public Post IDPost(int IDPost) {
-      setIDPost(IDPost);
-      return this;
+   public void increaseIterations () {
+      numIterations++;
    }
-
-   public Post title(String title) {
-      setTitle(title);
-      return this;
-   }
-
-   public Post content(String content) {
-      setContent(content);
-      return this;
-   }
-
-   public Post author(User author) {
-      setAuthor(author);
-      return this;
-   }
-
-   public Post commentsList(ConcurrentLinkedQueue<Comment> commentsList) {
-      setCommentsList(commentsList);
-      return this;
-   }
-
-   public Post likersList(ConcurrentLinkedQueue<User> likersList) {
-      setLikersList(likersList);
-      return this;
-   }
-
-   public Post dislikersList(ConcurrentLinkedQueue<User> dislikersList) {
-      setDislikersList(dislikersList);
-      return this;
-   }
-
-   public Post timestamp(Instant timestamp) {
-      setTimestamp(timestamp);
-      return this;
-   }
-
-   public Post rewinList(ConcurrentLinkedQueue<User> rewinList) {
-      setRewinList(rewinList);
-      return this;
-   }
-
-
-
-   @Override
-   public String toString() {
-      return "{" +
-         " ID Post='" + getIDPost() + "'" +
-         ", Titolo :'" + getTitle() + "'" +
-         ", Contenuto :'" + getContent() + "'" +
-         ", Autore ='" + getAuthor() + "'" +
-         ", commentsList='" + getCommentsList() + "'" +
-         ", likersList='" + getLikersList() + "'" +
-         ", dislikersList='" + getDislikersList() + "'" +
-         ", timestamp='" + getTimestamp() + "'" +
-         ", rewinList='" + getRewinList() + "'" +
-         "}";
-   }
-   
-   
-   public ConcurrentLinkedQueue<User> getRewinList() {
-      return this.rewinList;
-   }
-
-   public void setRewinList(ConcurrentLinkedQueue<User> rewinList) {
-      this.rewinList = rewinList;
+   public int getNumIterations() {
+      return numIterations+1;
    }
 
    public int getIDPost() {
@@ -145,12 +80,12 @@ public class Post {
       this.content = content;
    }
 
-   public User getAuthor() {
-      return this.author;
+   public String getAuthorUsername() {
+      return this.authorUsername;
    }
 
-   public void setAuthor(User author) {
-      this.author = author;
+   public void setAuthorUsername(String authorUsername) {
+      this.authorUsername = authorUsername;
    }
 
    public ConcurrentLinkedQueue<Comment> getCommentsList() {
@@ -161,28 +96,47 @@ public class Post {
       this.commentsList = commentsList;
    }
 
-   public ConcurrentLinkedQueue<User> getLikersList() {
+   public LinkedHashMap<User,Instant> getLikersList() {
       return this.likersList;
    }
 
-   public void setLikersList(ConcurrentLinkedQueue<User> likersList) {
+   public void setLikersList(LinkedHashMap<User,Instant> likersList) {
       this.likersList = likersList;
    }
 
-   public ConcurrentLinkedQueue<User> getDislikersList() {
+   public LinkedHashMap<User,Instant> getDislikersList() {
       return this.dislikersList;
    }
 
-   public void setDislikersList(ConcurrentLinkedQueue<User> dislikersList) {
+   public void setDislikersList(LinkedHashMap<User,Instant> dislikersList) {
       this.dislikersList = dislikersList;
    }
 
-   public Instant getTimestamp() {
-      return this.timestamp;
+   public Instant getCreationTimestamp() {
+      return this.creationTimestamp;
    }
 
-   public void setTimestamp(Instant timestamp) {
-      this.timestamp = timestamp;
+   public void setCreationTimestamp(Instant creationTimestamp) {
+      this.creationTimestamp = creationTimestamp;
    }
 
+   public Instant getLastUpdateTimestamp() {
+      return this.lastUpdateTimestamp;
+   }
+
+   public void setLastUpdateTimestamp(Instant lastUpdateTimestamp) {
+      this.lastUpdateTimestamp = lastUpdateTimestamp;
+   }
+
+   public ConcurrentLinkedQueue<User> getRewinList() {
+      return this.rewinList;
+   }
+
+   public void setRewinList(ConcurrentLinkedQueue<User> rewinList) {
+      this.rewinList = rewinList;
+   }
+   public void setNumIterations(int numIterations) {
+      this.numIterations = numIterations;
+   }
+   
 }

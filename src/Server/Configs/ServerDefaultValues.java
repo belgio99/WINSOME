@@ -24,7 +24,6 @@ public class ServerDefaultValues {
    public int rewardDelayTime;
    public float authorPercentage;
    public int cacheSize;
-   private Boolean printLog;
    
    
 
@@ -81,7 +80,6 @@ public class ServerDefaultValues {
       RMIName  = "WinsomeRegService";
       authorPercentage = 50;
       cacheSize = 10;
-      printLog = true;
       }
       catch (Exception e)
       {

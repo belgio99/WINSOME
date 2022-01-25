@@ -20,7 +20,7 @@ public class ClientMain {
     private static ByteBuffer buffer;
     // private LinkedList<String> tags;
     private static SocketChannel clientSocketChannel;
-
+    
     public static final int port = DefaultValues.serverval.TCPPort;
 
     public static void main(String[] args) throws Exception {
@@ -50,7 +50,7 @@ public class ClientMain {
         String input;
         System.out.println("Inserire l'input...");
         while (!(input = scanner.nextLine()).trim().equalsIgnoreCase("exit")) {
-            if (input.isBlank())
+            if (input.trim().isEmpty())
                 continue;
             //System.out.println("Sto per inviare: " + input);
             // String[] command =

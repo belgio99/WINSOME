@@ -1,17 +1,17 @@
 package Server.utils;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class User{
+public class User {
    private String username;
    private String password;
    private LinkedList<String> tags;
    private ConcurrentLinkedQueue<User> following;
    private ConcurrentLinkedQueue<User> followers;
-   private LinkedList<Transaction> wincoinList;
+   private LinkedBlockingQueue<Transaction> wincoinList;
    private double currentCompensation;
    private LinkedList<Post> blog;
-
 
    public User(String username, String password, LinkedList<String> tags) {
       this.username = username;
@@ -19,20 +19,15 @@ public class User{
       this.tags = tags;
       this.following = new ConcurrentLinkedQueue<>();
       this.followers = new ConcurrentLinkedQueue<>();
-      this.wincoinList = new LinkedList<>();
+      this.wincoinList = new LinkedBlockingQueue<>();
       this.currentCompensation = 0;
       this.blog = new LinkedList<>();
       
    }
-   
-
-   public double getCurrentCompensation() {
-      return this.currentCompensation;
+   public void addToWincoinList(double reward) {
+      wincoinList.add(new Transaction(reward));
    }
 
-   public void setCurrentCompensation(double currentCompensation) {
-      this.currentCompensation = currentCompensation;
-   }
 
    public String getUsername() {
       return this.username;
@@ -74,12 +69,20 @@ public class User{
       this.followers = followers;
    }
 
-   public LinkedList<Transaction> getWincoinList() {
+   public LinkedBlockingQueue<Transaction> getWincoinList() {
       return this.wincoinList;
    }
 
-   public void setWincoinList(LinkedList<Transaction> wincoinList) {
+   public void setWincoinList(LinkedBlockingQueue<Transaction> wincoinList) {
       this.wincoinList = wincoinList;
+   }
+
+   public double getCurrentCompensation() {
+      return this.currentCompensation;
+   }
+
+   public void setCurrentCompensation(double currentCompensation) {
+      this.currentCompensation = currentCompensation;
    }
 
    public LinkedList<Post> getBlog() {
@@ -89,41 +92,7 @@ public class User{
    public void setBlog(LinkedList<Post> blog) {
       this.blog = blog;
    }
-
-   public User username(String username) {
-      setUsername(username);
-      return this;
-   }
-
-   public User password(String password) {
-      setPassword(password);
-      return this;
-   }
-
-   public User tags(LinkedList<String> tags) {
-      setTags(tags);
-      return this;
-   }
-
-   public User following(ConcurrentLinkedQueue<User> following) {
-      setFollowing(following);
-      return this;
-   }
-
-   public User followers(ConcurrentLinkedQueue<User> followers) {
-      setFollowers(followers);
-      return this;
-   }
-
-   public User wincoinList(LinkedList<Transaction> wincoinList) {
-      setWincoinList(wincoinList);
-      return this;
-   }
-
-   public User blog(LinkedList<Post> blog) {
-      setBlog(blog);
-      return this;
-   }
+   
 
 
 }

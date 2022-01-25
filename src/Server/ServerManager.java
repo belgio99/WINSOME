@@ -9,21 +9,25 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.User;
+
 import static Server.utils.ResultCode.*;
 
 public class ServerManager {
    //private static final Gson gson = new Gson();
-
-   private static final Database database = new Database();
+   private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
+   private static final Database database = new Database(analyzeList);
+   
    private static Selector selector;
    private static final ConcurrentHashMap<SocketChannel, User> usersLogged = new ConcurrentHashMap<>();
    
@@ -35,6 +39,7 @@ public class ServerManager {
       catch (IOException e) {
          e.printStackTrace();
       }
+      RewardCalculator r1 = new RewardCalculator(analyzeList);
    }
 
    public static boolean register(String username, String password, LinkedList<String> tagsList) {
@@ -57,7 +62,8 @@ public class ServerManager {
    public static Post createPost(String title, String content, User author) {
       Post post = new Post(database.getPreviousMaxPostID()+1, author, title, content);
       database.addPost(author, post);
-      database.saveDatabase();
+      analyzeList.add(post);
+      //database.saveDatabase();
       return post;
 
    }
@@ -106,6 +112,7 @@ public class ServerManager {
 
       Comment comment = new Comment(u, content);
       post.getCommentsList().add(comment);
+      analyzeList.add(post);
       return OK.getCode();
    }
 
@@ -120,18 +127,20 @@ public class ServerManager {
    public static int ratePost(User u, Post post, int vote) {
       if (post.getAuthor().equals(u))
          return RATE_OWN_POST.getCode();
-      if (post.getLikersList().contains(u) || post.getDislikersList().contains(u))
+      if (post.getLikersList().containsKey(u) || post.getDislikersList().containsKey(u))
          return ALREADY_RATED.getCode();
       if (!database.getUserPosts(u).contains(post))
          return RATE_BEFORE_REWIN.getCode();
       switch (vote) {
       case 1:
-         post.getLikersList().add(u); break;
+         post.getLikersList().put(u, Instant.now()); break;
+
       case -1:
-         post.getDislikersList().add(u); break;
+         post.getDislikersList().put(u, Instant.now()); break;
       default:
          return ILLEGAL_OPERATION.getCode();
          }
+      analyzeList.add(post); 
       return OK.getCode();
       }
 
@@ -186,6 +195,12 @@ public class ServerManager {
       feedList.addAll(database.getUserPosts(followingUser));
       Collections.shuffle(feedList);
       return feedList;
+   }
+
+   public static void shutdown() {
+      for (SocketChannel cc : usersLogged.keySet())
+         logoutUser(cc);
+      database.saveDatabase();
    }
 
 }

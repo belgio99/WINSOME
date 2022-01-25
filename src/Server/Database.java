@@ -1,15 +1,14 @@
 package Server;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,22 +23,24 @@ public class Database {
    private final ConcurrentHashMap<String, User> userDB;
    private final ConcurrentLinkedDeque<Post> postList;
    private final ConcurrentHashMap<String, LinkedList<User>> globalTagsList;
+   private final ConcurrentLinkedQueue<Post> analyzeList;
 /*    private final ConcurrentHashMap<String, LinkedList<Post>> trash;
    private final ConcurrentHashMap<String, LinkedList<String>> tags; */
    private final Gson gson;
 
 
 
-   public Database() {
+   public Database(ConcurrentLinkedQueue<Post> analyzeList) {
       database = new ConcurrentHashMap<>();
       postList = new ConcurrentLinkedDeque<>();
       globalTagsList = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
+      this.analyzeList = analyzeList;
       //trash = new ConcurrentHashMap<>();
       //usersLogged = new ConcurrentHashMap<>();
 
       gson = new GsonBuilder().setPrettyPrinting().create();
-      loadDatabase();
+      //loadDatabase();
       
 
       File dbfolder = new File(DefaultValues.serverval.databasePath);
@@ -63,6 +64,19 @@ public class Database {
       }
    }
 
+   public synchronized void updatePost(Post post) {
+      User author = post.getAuthor();
+
+      if (database.containsKey(author)) {
+          LinkedList<Post> posts = database.get(author);
+          int index;
+          if ((index = posts.indexOf(post)) >= 0) {
+              posts.set(index, post);
+              return;
+          }
+      }
+
+  }
    public boolean registerUser(String username, String password, LinkedList<String> tagsList) {
          //E' null se l'utente non esisteva e può essere registrato, altrimenti ritorna un'username dunque il login sarà fallito.
          User newUser = new User(username, password, tagsList);
@@ -103,21 +117,24 @@ public class Database {
          e.printStackTrace();
          return false;
       }
-      try (FileWriter writer2 = new FileWriter(DefaultValues.serverval.databasePath+"/userdb.json")){
-         gson.toJson(database, writer2);
+      try (FileWriter writer2 = new FileWriter(DefaultValues.serverval.databasePath+"/userdb.json")) {
+         gson.toJson(userDB, writer2);
          writer2.flush();
       }
-      
-      /*try (FileWriter writer = new FileWriter(DefaultValues.serverval.databasePath+"/database.json")) {
-         gson.toJson(database, writer);
-         return true;
-      }*/
       catch (Exception e)
       {
          e.printStackTrace();
          return false;
       }
-      return true;
+      try (FileWriter writer3 = new FileWriter(DefaultValues.serverval.databasePath+"/analyzelist.json")) {
+         gson.toJson(analyzeList, writer3);
+         return true;
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         return false;
+      }
    }
    /*public User loginUser(String username, String password) {
       return findUserByUsername(username);

@@ -19,16 +19,15 @@ import Server.RMI.RegistrationService;
 
 public class ServerMain {
 
-   
-   
-   //private static ByteBuffer buffer;
-   //private static final int port = 10000;
+   // private static ByteBuffer buffer;
+   // private static final int port = 10000;
    public static ServerSocketChannel serverSocketChannel;
 
    public static void main(String[] args) {
       System.out.println("Avvio server...");
       ExecutorService threadPool = Executors.newCachedThreadPool();
       Selector selector = ServerManager.getSelector();
+
       try {
          serverSocketChannel = ServerSocketChannel.open();
          serverSocketChannel.configureBlocking(false);
