@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import Server.Configs.DefaultValues;
 import Server.utils.ResultCode;
+import Server.RMI.Registration.RegistrationServerInterface;
 
 import static Server.utils.ResultCode.*;
 
@@ -30,6 +31,7 @@ public class ClientMain {
                     new InetSocketAddress(DefaultValues.serverval.serverAddress, DefaultValues.serverval.TCPPort));
             clientSocketChannel.configureBlocking(true);
             buffer = ByteBuffer.allocate(1024);
+            
             // Registry r1 = LocateRegistry.getRegistry(DefaultValues.client.RMIAddress,
             // DefaultValues.serverval.RMIPort);
 
@@ -191,7 +193,7 @@ public class ClientMain {
 
     private static void listUsers(String input) throws IOException{
         System.out.println("Lista di utenti con almeno un tag in comune:");
-        System.out.println(receive());
+        System.out.println(receiveString());
         return;
 
     }
@@ -207,7 +209,7 @@ public class ClientMain {
         }
     }
 
-    private static String receive() {
+    private static String receiveString() {
         int numBytes = 0;
         try {
             numBytes = receiveInt();
@@ -226,17 +228,20 @@ public class ClientMain {
         buffer.flip();
         return buffer.asIntBuffer().get();
     }
-
+    
     private static void showPost(String input) throws IOException {
         if (receiveInt()!=OK.getCode())
             return;
-        System.out.println("< Titolo: " + receive());
-        System.out.println("< Contenuto: " + receive());
+        System.out.println("< Titolo: " + receiveString());
+        System.out.println("< Contenuto: " + receiveString());
         System.out.println("< Voti: " + receiveInt() + " positivi, " + receiveInt() + " negativi");
         System.out.println("< Commenti:");
         int loop = receiveInt();
         for (int i=0; i<loop; i++)
-            System.out.println("    " + receive() + ": " + receive());
+            System.out.println("    " + receiveString() + ": " + receiveString());
         return;
+    }
+    private static void listFollowing(String input) throws IOException {
+        
     }
 }

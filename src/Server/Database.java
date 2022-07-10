@@ -3,6 +3,7 @@ package Server;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -53,17 +54,44 @@ public class Database {
       
 
    }
-
-   public void loadDatabase() {
-      try (FileReader reader = new FileReader(DefaultValues.serverval.databasePath+"/database.json")) {
-         gson.fromJson(reader, database.getClass());
-         //gson.fromJson(reader, postList.getClass());
+   public void loadDatabaseFromFile() {
+      File dbFile = new File(DefaultValues.serverval.databasePath + "/" + DefaultValues.serverval.databaseFile);
+      if (!dbFile.exists()) {
+         try {
+            dbFile.createNewFile();
+         }
+         catch (IOException e) {
+            e.printStackTrace();
+         }
+      }
+      try {
+         FileReader fr = new FileReader(dbFile);
+         database.clear();
+         postList.clear();
+         globalTagsList.clear();
+         userDB.clear();
+         //trash.clear();
+         //tags.clear();
+         database.putAll(gson.fromJson(fr, ConcurrentHashMap.class));
+         fr.close();
       }
       catch (Exception e) {
          e.printStackTrace();
       }
    }
 
+   public void saveDatabaseToFile() {
+      File dbFile = new File(DefaultValues.serverval.databasePath + "/" + DefaultValues.serverval.databaseFile);
+      try {
+         FileWriter fw = new FileWriter(dbFile);
+         fw.write(gson.toJson(database));
+         fw.close();
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+   
    public synchronized void updatePost(Post post) {
       User author = post.getAuthor();
 
@@ -90,15 +118,17 @@ public class Database {
          saveDatabase();
          return (database.putIfAbsent(newUser, new LinkedList<Post>()) == null) ? true: false;
       }
-
-
    public boolean addPost(User author, Post post) {
       LinkedList<Post> oldPostList = database.get(author);
       if (!oldPostList.offerFirst(post)) return false;
       if (!postList.offerFirst(post)) return false;
       return (database.replace(author, oldPostList) == null) ? false : true;
       //updateJSON();
+      //save new database to json
+      
+
    }
+   
    public boolean deletePost(Post post) {
       database.get(post.getAuthor()).remove(post);
       postList.remove(post);

@@ -7,6 +7,7 @@ public class ClientConfigValues {
    public final int maxCharPostLength = 160;
    public final String RMIAddress = "localhost";
    public final int RMIPort = 50004;
+
    
    public ClientConfigValues() {
    }

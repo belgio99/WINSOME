@@ -1,3 +1,5 @@
+package Server;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -12,7 +14,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import Server.ServerManager;
 import static Server.utils.ResultCode.*;
 
 import Server.utils.Comment;
@@ -32,6 +33,7 @@ public class ServerRequestHandler implements Runnable {
       this.clientChannel = clientChannel;
       this.selector = selector;
       buffer = ByteBuffer.allocate(1024);
+      
    }
 
    private String receiveRequest() throws IOException {
@@ -172,7 +174,7 @@ public class ServerRequestHandler implements Runnable {
          }
    
    }
-   private void registerKey(SocketChannel clientChannel, Object object) {
+   /*private void registerKey(SocketChannel clientChannel, Object object) {
       try {
          clientChannel.register(selector, SelectionKey.OP_READ, object);
          selector.wakeup();
@@ -181,7 +183,7 @@ public class ServerRequestHandler implements Runnable {
             ServerManager.logoutUser(clientChannel);
          }
    
-   }
+   }*/
    /*
     * private void sendResult(int result) {
     * try {

@@ -119,6 +119,7 @@ public class ServerManager {
       return OK.getCode();
    }
 
+   
    public static int rewinPost(User u, Post post) {
       if (post == null) return POST_NOT_FOUND.getCode();
 
@@ -207,7 +208,8 @@ public class ServerManager {
       database.saveDatabase();
    }
    public static void addCallback(String username, CallbackService service) {
-      callbacksMap.put(username, service);
+      //callbacksMap.put(username, service);
+
   }
 
   public static void removeCallback(String username, CallbackService service) {

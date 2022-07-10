@@ -80,6 +80,7 @@ public class ServerDefaultValues {
       RMIName  = "WinsomeRegService";
       authorPercentage = 50;
       cacheSize = 10;
+      
       }
       catch (Exception e)
       {
