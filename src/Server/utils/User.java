@@ -11,7 +11,6 @@ public class User {
    private ConcurrentLinkedQueue<User> followers;
    private LinkedBlockingQueue<Transaction> wincoinList;
    private double currentCompensation;
-   private LinkedList<Post> blog;
 
    public User(String username, String password, LinkedList<String> tags) {
       this.username = username;
@@ -21,7 +20,6 @@ public class User {
       this.followers = new ConcurrentLinkedQueue<>();
       this.wincoinList = new LinkedBlockingQueue<>();
       this.currentCompensation = 0;
-      this.blog = new LinkedList<>();
       
    }
    public void addToWincoinList(double reward) {
@@ -85,14 +83,6 @@ public class User {
       this.currentCompensation = currentCompensation;
    }
 
-   public LinkedList<Post> getBlog() {
-      return this.blog;
-   }
-
-   public void setBlog(LinkedList<Post> blog) {
-      this.blog = blog;
-   }
-   
 
 
 }

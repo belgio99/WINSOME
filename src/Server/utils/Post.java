@@ -6,11 +6,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Post {
 
-   private int IDPost;
+   private int ID;
    private String title;
    private String content;
-   private transient User author;
-   private String authorUsername;
+   private String author;
    private ConcurrentLinkedQueue<Comment> commentsList;
    private LinkedHashMap<User, Instant> likersList;
    private LinkedHashMap<User, Instant> dislikersList;
@@ -21,13 +20,12 @@ public class Post {
    
    
 
-   public Post(int IDPost, User author, String title, String content) {
-      this.IDPost = IDPost;
-      //Da controllare se quell'IDpost è già preso
+   public Post(int ID, String author, String title, String content) {
+      this.ID = ID;
+      //Da controllare se quell'ID è già preso
       this.title = title;
       this.content = content;
       this.author = author;
-      authorUsername = author.getUsername();
       creationTimestamp = Instant.now();
       commentsList = new ConcurrentLinkedQueue<>();
       likersList = new LinkedHashMap<>();
@@ -41,11 +39,11 @@ public class Post {
 
    }
 
-   public User getAuthor() {
+   public String getAuthor() {
       return this.author;
    }
 
-   public void setAuthor(User author) {
+   public void setAuthor(String author) {
       this.author = author;
    }
 
@@ -56,12 +54,12 @@ public class Post {
       return numIterations+1;
    }
 
-   public int getIDPost() {
-      return this.IDPost;
+   public int getId() {
+      return this.ID;
    }
 
-   public void setIDPost(int IDPost) {
-      this.IDPost = IDPost;
+   public void setID(int ID) {
+      this.ID = ID;
    }
 
    public String getTitle() {
@@ -79,15 +77,6 @@ public class Post {
    public void setContent(String content) {
       this.content = content;
    }
-
-   public String getAuthorUsername() {
-      return this.authorUsername;
-   }
-
-   public void setAuthorUsername(String authorUsername) {
-      this.authorUsername = authorUsername;
-   }
-
    public ConcurrentLinkedQueue<Comment> getCommentsList() {
       return this.commentsList;
    }

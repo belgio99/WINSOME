@@ -10,13 +10,13 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import Server.ServerManager;
-import Server.ServerRequestHandler;
 import Server.Configs.DefaultValues;
-import Server.RMI.Registration.RegistrationService;
+import Server.RMI.Registration.RemoteService;
 
 public class ServerMain {
 
@@ -28,6 +28,8 @@ public class ServerMain {
       System.out.println("Avvio server...");
       ExecutorService threadPool = Executors.newCachedThreadPool();
       Selector selector = ServerManager.getSelector();
+      ConcurrentLinkedQueue<SocketChannel> registerQueue = new ConcurrentLinkedQueue<>();
+      ServerManager.startupServer();
 
       try {
          serverSocketChannel = ServerSocketChannel.open();
@@ -40,7 +42,7 @@ public class ServerMain {
          String multicastAddress = DefaultValues.serverval.multicastAddress + ":" + DefaultValues.serverval.multicastPort;
          ByteBuffer multicastBuffer = ByteBuffer.wrap(multicastAddress.getBytes());
          
-         RegistrationService regService = new RegistrationService();
+         RemoteService regService = new RemoteService();
          Registry r1 = LocateRegistry.createRegistry(DefaultValues.serverval.RMIPort);
          r1.bind(DefaultValues.serverval.RMIName, regService);
 
@@ -52,14 +54,14 @@ public class ServerMain {
                Selector selector = ServerManager.getSelector();
                System.out.println("Esco!");
                
-                try {
-                     selector.close();
-                     serverSocketChannel.close();
-                     UnicastRemoteObject.unexportObject(regService, false);
-                     r1.unbind(DefaultValues.serverval.RMIName);
-                    Thread.sleep(200);
-                    System.out.println("Shutting down ...");
-                    //some cleaning up code...
+               try {
+                  selector.close();
+                  serverSocketChannel.close();
+                  UnicastRemoteObject.unexportObject(regService, false);
+                  r1.unbind(DefaultValues.serverval.RMIName);
+                  Thread.sleep(200);
+                  System.out.println("Shutting down ...");
+                  ServerManager.shutdownServer();
     
                 } catch (Exception e) {
                     Thread.currentThread().interrupt();
@@ -85,6 +87,8 @@ public class ServerMain {
          System.out.println("Attesa nel select...");
       while (true) {
          while (selector.select()==0) {
+            while (!registerQueue.isEmpty())
+               registerQueue.poll().register(selector, SelectionKey.OP_READ);
             continue;
          }
          System.out.println("Ricevuta nuova chiave!");
@@ -100,7 +104,7 @@ public class ServerMain {
                } else if (key.isReadable()) {
                   System.out.println("La chiave è di tipo READ");
                   SocketChannel client = (SocketChannel) key.channel();
-                  ServerRequestHandler request = new ServerRequestHandler(client,selector);
+                  ServerRequestHandler request = new ServerRequestHandler(client,selector, registerQueue);
                   key.cancel();
                   updateKeySet(selector);
                   threadPool.submit(new Thread(request));

@@ -1,6 +1,6 @@
 package Server.utils;
 public enum ResultCode {
-   OK(0, "Operazione completata."),
+   OK(0, "Operazione completata."), //da utilizzare quando l'operazione viene semplicemente completata, senza bisogno di altre spiegazioni
    USER_ALREADY_REGISTERED(1, "Errore!: L'utente è già registrato!"),
    USER_NOT_FOUND(2, "Errore!: L'utente non è stato trovato!"),
    ILLEGAL_OPERATION(3, "Errore!: Operazione non valida!"),
@@ -12,7 +12,9 @@ public enum ResultCode {
    MALFORMED_INPUT(9, "Errore!: Il comando richiesto è mal costruito!"),
    POST_NOT_FOUND(10, "Errore!: Il post richiesto non è stato trovato!"),
    UNAUTHORIZED_USER(11, "Errore!: Non sei autorizzato a svolgere questa operazione!"),
-   NO_EFFECT(12, "Errore!: L'azione che hai fatto non ha cambiato nulla nel Server...");
+   NO_EFFECT(12, "Errore!: L'azione che hai fatto non ha cambiato nulla nel Server..."),
+   ANSWER_MSG(13, "Arriva una risposta!");
+   
 
 
    private final int code;

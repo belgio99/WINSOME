@@ -16,6 +16,9 @@ public class Transaction {
    public double getWinCoin() {
       return this.winCoin;
    }
+   public String getWinCoinAsString() {
+      return Double.toString(winCoin);
+   }
 
 
    public Instant getTimestamp() {

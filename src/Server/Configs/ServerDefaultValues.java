@@ -24,6 +24,8 @@ public class ServerDefaultValues {
    public int rewardDelayTime;
    public float authorPercentage;
    public int cacheSize;
+
+   public int columnSize;
    
    
 
@@ -55,6 +57,7 @@ public class ServerDefaultValues {
          databasePath = (String) properties.getOrDefault("databasePath", databasePath);
          rewardDelayTime = Integer.parseInt((String) properties.getOrDefault("rewardDelayTime", rewardDelayTime));
 
+         columnSize = Integer.parseInt((String) properties.getOrDefault("columnSize", columnSize));
    }
    catch (Exception e)
    {
@@ -68,18 +71,19 @@ public class ServerDefaultValues {
    private void setDefaults() {
       try {
       serverAddress = InetAddress.getLoopbackAddress();
+      RMIAddress = InetAddress.getLoopbackAddress();
       TCPPort = 50000;
       UDPPort = 50001;
+      RMIPort = 50003;
       multicastAddress = "239.255.32.32";
       multicastPort = 50002;
-      RMIAddress = InetAddress.getLoopbackAddress();
-      RMIPort = 50003;
       socketTimeout = -1;
       rewardDelayTime = -1;
-      databasePath = "/tmp/db";
+      databasePath = "/tmp";
       RMIName  = "WinsomeRegService";
       authorPercentage = 50;
       cacheSize = 10;
+      columnSize = 10;
       
       }
       catch (Exception e)
@@ -89,7 +93,7 @@ public class ServerDefaultValues {
    }
 
    private int checkValidPort(int port, int defaultValue) {
-      if(port == 8080) System.err.println("Errore: la porta 8080 è riservata per l invio dei Post e delle transizioni");
+      if(port == 8080) System.err.println("Errore: la porta 8080 è riservata per l invio dei Post e delle transazioni");
       return port == 8080 ? defaultValue : port;
   }
 }

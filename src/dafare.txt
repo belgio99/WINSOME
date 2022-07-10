@@ -1,0 +1,8 @@
+Da finire:
+1. FollowNotifierService con le callbacks
+2. 
+
+
+
+Bugs:
+1. 

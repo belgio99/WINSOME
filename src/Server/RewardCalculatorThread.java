@@ -34,7 +34,9 @@ public class RewardCalculatorThread implements Runnable{
             HashSet<User> personAnalyzed = analyze(p);
          p.increaseIterations();
          double authorReward = round((reward * DefaultValues.serverval.authorPercentage)/100,1);
-         p.getAuthor().addToWincoinList(reward);
+         User author = ServerManager.findUserByUsername(p.getAuthor());
+         if (author == null) return;
+         author.addToWincoinList(reward);
          double othersReward = round((reward - authorReward)/ personAnalyzed.size(),1);
          for (User user : personAnalyzed)
             user.addToWincoinList(othersReward);
@@ -43,7 +45,7 @@ public class RewardCalculatorThread implements Runnable{
 
          analyzeList.remove(p);
          try {
-            String msg = "RewardsCalcolati!";
+            String msg = "Rewards Calcolati!";
             ServerUtils.sendUDPMessage(msg);
          }
          catch (Exception e) {

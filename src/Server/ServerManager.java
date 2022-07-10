@@ -22,8 +22,6 @@ import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.User;
 
-import static Server.utils.ResultCode.*;
-
 public class ServerManager {
    //private static final Gson gson = new Gson();
    private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
@@ -44,34 +42,67 @@ public class ServerManager {
       }
       r1 = new RewardCalculator(analyzeList);
    }
+   public static void startupServer() {
+      database.loadDatabaseFromFile();
+      return;
+   }
 
-   public static boolean register(String username, String password, LinkedList<String> tagsList) {
-      return database.registerUser(username, password, tagsList);
-
+   public static void shutdownServer() {
+      database.saveDatabaseToFile();
+      return;
+   }
+   public static int register(String username, String password, LinkedList<String> tagsList) {
+      if (!database.registerUser(username, password, tagsList))
+         return -1;
+      int score = 0;
+      //se la password è lunga, aumenta il punteggio di 1
+      if (password.length() > 12) {
+         score += 1;
+      } //se la password contiene una combinazione di caratteri maiuscoli e minuscoli, aumenta il punteggio di 1
+      if (password.matches("[a-zA-Z]+")) {
+         score += 1;
+      } //se la password contiene un numero, aumenta il punteggio di 1
+      if (password.matches("[0-9]+")) {
+         score += 1;
+      } //se la password contiene un carattere speciale, aumenta il punteggio di 1
+      if (password.matches("[^a-zA-Z0-9]+")) {
+         score += 1;
+      }
+      return score;
    }
    public static User login(String username, String password, SocketChannel clientChannel) {
        User user = database.findUserByUsername(username);
        if (user == null) return null;
        if (!password.equals(user.getPassword())) return null;
-       addUserLogged(user, clientChannel);
-       return user;
+       if (usersLogged.get(clientChannel) == null) {
+         usersLogged.put(clientChannel, user);
+         return user;
+       }
+       else return null;
       
    }
-   public static boolean logoutUser(SocketChannel clientChannel) {
+   public static int logout(SocketChannel clientChannel) {
       //database.logoutUser(u);
       return removeUserLogged(clientChannel);
 
    }
    public static Post createPost(String title, String content, User author) {
-      Post post = new Post(database.getPreviousMaxPostID()+1, author, title, content);
+      Post post = new Post(database.getPreviousMaxPostID()+1, author.getUsername(), title, content);
       database.addPost(author, post);
       analyzeList.add(post);
       //database.saveDatabase();
       return post;
-
    }
-   public static boolean deletePost(Post post) {
-      return database.deletePost(post);
+   public static int deletePost(Post post) {
+      try { 
+         database.deletePost(post);
+         analyzeList.remove(post);
+         return 0;
+      }
+      catch (Exception e)
+      {
+         return -1;
+      }
 
    }
 
@@ -86,55 +117,60 @@ public class ServerManager {
    public static Selector getSelector() {
       return selector;
    }
-   public static boolean addUserLogged(User user, SocketChannel clientChannel) {
-      return usersLogged.putIfAbsent(clientChannel, user) == null ? true : false;
-   }
-   public static boolean removeUserLogged(SocketChannel clientChannel) {
-      return usersLogged.remove(clientChannel) == null ? false : true;
+   public static int removeUserLogged(SocketChannel clientChannel) {
+      try {
+         return usersLogged.remove(clientChannel) == null ? -1 : 0;
+      }
+      catch (NullPointerException e)
+      {
+         return -1;
+      }
    }
    public static User getUserLogged(SocketChannel clientChannel) {
       return usersLogged.get(clientChannel);
    }
    public static int followUser(User u, String usernameToFollow) {
       User userToFollow = database.findUserByUsername(usernameToFollow);
-      if (userToFollow == null) return USER_NOT_FOUND.getCode();
+      if (userToFollow == null) return -1;
       u.getFollowing().add(userToFollow);
       userToFollow.getFollowers().add(u);
-      return OK.getCode();
+      return 0;
    }
    public static int unfollowUser(User u, String usernameToUnfollow) {
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
-      if (userToUnfollow == null) return USER_NOT_FOUND.getCode();
+      if (userToUnfollow == null) return -1;
       if (u.getFollowing().remove(userToUnfollow) && userToUnfollow.getFollowers().remove(u))
-         return OK.getCode();
-      return NO_EFFECT.getCode();
+         return 0;
+      return 1;
+   }
+
+   public static LinkedList<Post> viewBlog(User u) {
+      return database.getUserPosts(u);
    }
 
    public static int addComment(User u, Post post, String content) {
-      if (post == null) return POST_NOT_FOUND.getCode();
-
+      if (post == null) return -1;
       Comment comment = new Comment(u, content);
       post.getCommentsList().add(comment);
       analyzeList.add(post);
-      return OK.getCode();
+      return 0;
    }
 
    
    public static int rewinPost(User u, Post post) {
-      if (post == null) return POST_NOT_FOUND.getCode();
-
+      if (post == null) return -1;
       database.addPost(u, post);
       post.getRewinList().add(u);
-      return OK.getCode();
+      return 0;
    }
 
    public static int ratePost(User u, Post post, int vote) {
       if (post.getAuthor().equals(u))
-         return RATE_OWN_POST.getCode();
+         return -2;
       if (post.getLikersList().containsKey(u) || post.getDislikersList().containsKey(u))
-         return ALREADY_RATED.getCode();
+         return -3;
       if (!database.getUserPosts(u).contains(post))
-         return RATE_BEFORE_REWIN.getCode();
+         return -4;
       switch (vote) {
       case 1:
          post.getLikersList().put(u, Instant.now()); break;
@@ -142,10 +178,10 @@ public class ServerManager {
       case -1:
          post.getDislikersList().put(u, Instant.now()); break;
       default:
-         return ILLEGAL_OPERATION.getCode();
+         return -1;
          }
       analyzeList.add(post); 
-      return OK.getCode();
+      return 0;
       }
 
    public static double getWalletAmount(User u) {
@@ -184,14 +220,23 @@ public class ServerManager {
       HashSet<String> returnSet = new HashSet<>();
       Iterator<String> itr1 = userTags.iterator();
       while (itr1.hasNext()) {
-         LinkedList<User> userTagList = database.getUsersOfTag(itr1.next());
-         Iterator<User> itr2 = userTagList.iterator();
+         LinkedList<String> userTagList = database.getUsersOfTag(itr1.next());
+         Iterator<String> itr2 = userTagList.iterator();
          while (itr2.hasNext())
-            returnSet.add(itr2.next().getUsername());
+            returnSet.add(itr2.next());
       }
          
       return returnSet;
 
+   }
+
+   public static HashSet<String> listFollowing(User u) {
+      HashSet<String> returnSet = new HashSet<>();
+      Iterator<User> itr = u.getFollowing().iterator();
+      while (itr.hasNext()) {
+         returnSet.add(itr.next().getUsername());
+      }
+      return returnSet;
    }
    public static LinkedList<Post> showFeed(User u) {
       LinkedList<Post> feedList = new LinkedList<>();
@@ -203,18 +248,21 @@ public class ServerManager {
 
    public static void shutdown() {
       for (SocketChannel cc : usersLogged.keySet())
-         logoutUser(cc);
+         logout(cc);
       r1.shutdown();
       database.saveDatabase();
    }
-   public static void addCallback(String username, CallbackService service) {
+   public static void addCallback(String username, CallbackService service) throws NullPointerException {
+      User u = database.findUserByUsername(username);
+      if (u == null) throw new NullPointerException();
+      callbacksMap.put(u, service);
       //callbacksMap.put(username, service);
 
   }
 
-  public static void removeCallback(String username, CallbackService service) {
-      if (username == null) return;
-
+  public static void removeCallback(String username, CallbackService service) throws NullPointerException{
+      if (username == null) 
+         throw new NullPointerException();
       callbacksMap.remove(username, service);
   }
 

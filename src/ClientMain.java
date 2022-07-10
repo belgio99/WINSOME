@@ -8,9 +8,9 @@ import java.rmi.registry.Registry;
 import java.util.LinkedList;
 import java.util.Scanner;
 
+import Server.ServerRemoteInterface;
 import Server.Configs.DefaultValues;
 import Server.utils.ResultCode;
-import Server.RMI.Registration.RegistrationServerInterface;
 
 import static Server.utils.ResultCode.*;
 
@@ -20,8 +20,9 @@ public class ClientMain {
     private static ByteBuffer buffer;
     // private LinkedList<String> tags;
     private static SocketChannel clientSocketChannel;
-    
+    public static ServerRemoteInterface remote;
     public static final int port = DefaultValues.serverval.TCPPort;
+    private static Boolean isUserLoggedIn = false;
 
     public static void main(String[] args) throws Exception {
 
@@ -31,10 +32,14 @@ public class ClientMain {
                     new InetSocketAddress(DefaultValues.serverval.serverAddress, DefaultValues.serverval.TCPPort));
             clientSocketChannel.configureBlocking(true);
             buffer = ByteBuffer.allocate(1024);
+            Registry r1 = LocateRegistry.getRegistry(DefaultValues.client.RMIAddress, DefaultValues.serverval.RMIPort);
+            remote = (ServerRemoteInterface) r1.lookup(DefaultValues.serverval.RMIName);
             
+
+
             // Registry r1 = LocateRegistry.getRegistry(DefaultValues.client.RMIAddress,
             // DefaultValues.serverval.RMIPort);
-
+            
             /*
              * socket.connect(new InetSocketAddress(serverName, port));
              * System.out.println("Sto provando a connettermi al server");
@@ -50,36 +55,62 @@ public class ClientMain {
         Scanner scanner = new Scanner(System.in);
         String input;
         System.out.println("Inserire l'input...");
+        System.out.println("Inserire parole da inviare al server, o scrivere \"exit\" per uscire");
+        System.out.print("> ");
         while (!(input = scanner.nextLine()).trim().equalsIgnoreCase("exit")) {
             if (input.trim().isEmpty())
                 continue;
-            //System.out.println("Sto per inviare: " + input);
+            // System.out.println("Sto per inviare: " + input);
             // String[] command =
-            Boolean action = false;
-            input = input.toLowerCase();
+            input = input.toLowerCase().trim();
             String[] splitted = input.split(" ");
-            switch (splitted[0]) {
-            case "register":
-                action=true;
-                register(input);
-                break;
-            case "login":
-                action=true;   
-                login(input);
-                int receive = receiveInt();
-                System.out.println(ResultCode.values()[receive]);
-                break;
-            default: break;
+            if (!isUserLoggedIn) {
+                switch (splitted[0]) {
+                    case "register":
+                        register(input);
+                        break;
+                    case "login":
+                        send(input);
+                        if (receiveString().equals("Operazione completata")) {
+                            isUserLoggedIn = true;
+                            System.out.println("< Operazione completata");
+                        } else {
+                            System.out.println("< Login fallito!"); //Ricevo la stringa con il messaggio di errore
+                        }
+                        break;
+                    default:
+                            System.out.println("< Comando non disponibile: attualmente è possibile solo il login o registrarsi");
+                        break;
+                }
             }
-            if (!action) {
+            else {
+                switch (splitted[0]) {
+                    case "logout":
+                        send(input);
+                        if (receiveString().equals("Operazione completata")) {
+                            isUserLoggedIn = false;
+                            System.out.println("< Operazione completata");
+                        } else {
+                            System.out.println("< Logout fallito!"); //Ricevo la stringa con il messaggio di errore
+                        }
+                        break;
+                    default:
+                    send(input);
+                    System.out.println("< " + receiveString());
+                    
 
+            }
+        }
+        System.out.print("> ");
+            
+/*
             send(input);
             int code = receiveInt();
             if (code != OK.getCode()) {
                 System.out.println(ResultCode.values()[code]);
                 continue;
-            }
-            else switch (splitted[0]) {
+            } else
+                switch (splitted[0]) {
                     case "list":
                         switch (splitted[1]) {
                             case "user":
@@ -100,71 +131,43 @@ public class ClientMain {
                                 // ILLEGAL_OPERATION;
                                 break;
                         }
-                    break;
+                        break;
                     case "post":
                         createPost(input);
                         break;
-                    /*case "rewin":
-                    case "rate":
-                    case "wallet":
-                    case "comment":
-                    case "blog":
-                    case "delete":
-                    case "follow":
-                    case "unfollow":
-                    case "logout":*/
+                    /*
+                     * case "rewin":
+                     * case "rate":
+                     * case "wallet":
+                     * case "comment":
+                     * case "blog":
+                     * case "delete":
+                     * case "follow":
+                     * case "unfollow":
+                     * case "logout":
+                     
                     default:
 
                         break;
 
                 }
-                int receive = receiveInt();
-                System.out.println(ResultCode.values()[receive]);
-            }
-            
-            // System.out.println(receive);
+            int receive = receiveInt();
+            System.out.println(ResultCode.values()[receive]);
 
+            // System.out.println(receive);
+*/
             buffer.clear(); // Resetto il buffer
             /*
              * System.out.println("Messaggio ricevuto dal server: ");
              * System.out.println();
              */
-            System.out.println("Inserire parole da inviare al server, o scrivere \"exit\" per uscire");
-        
+            
+
         }
         scanner.close();
 
     }
-    private static void createPost(String input) throws IOException {
-        if (receiveInt()==OK.getCode()) {
-            System.out.println("Nuovo post creato: ID "+ receiveInt());
-        }
-        return;
-    }
 
-    private static void login(String input) {
-        // String splittedInput[] = input.split(" ");
-        // String op = splittedInput[0];
-        // String username = splittedInput[1];
-        // String password = splittedInput[2];
-        send(input);
-        // String response = receive();
-        /*switch (receive()) {
-            case "USER NOT FOUND":
-            case "UNKNOWN COMMAND":
-                System.out.println("errore!");
-                break;
-            default:
-                System.out.println("Operazione completata");
-                break;
-        }*/
-    }
-
-    /*
-     * if (!response.equals("Errore"))
-     * return;
-     * }
-     */
     private static void register(String input) {
         String splittedInput[] = input.split(" ");
         String username = splittedInput[1];
@@ -174,15 +177,11 @@ public class ClientMain {
         for (int i = 3; i < splittedInput.length; i++)
             tagsList.add(splittedInput[i]);
         try {
-            Registry r1 = LocateRegistry.getRegistry(DefaultValues.client.RMIAddress, DefaultValues.serverval.RMIPort);
-            RegistrationServerInterface registerService = (RegistrationServerInterface) r1
-                    .lookup(DefaultValues.serverval.RMIName);
-            if (!registerService.registerUser(username, password, tagsList))
+            int score = remote.registerUser(username, password, tagsList);
+            if (score == -1)
                 System.out.println("Registrazione Fallita!");
-            else {
-                System.out.println("Registrazione riuscita!");
-            }
-
+            else 
+                System.out.println("Registrazione riuscita! Il punteggio di sicurezza della tua password è: " + score);
         }
 
         catch (Exception e) {
@@ -191,11 +190,18 @@ public class ClientMain {
 
     }
 
-    private static void listUsers(String input) throws IOException{
-        System.out.println("Lista di utenti con almeno un tag in comune:");
-        System.out.println(receiveString());
-        return;
-
+    private static void getServerAnswer() {
+        try {
+            int receive = receiveInt();
+            if (receive == OK.getCode()) {
+                System.out.println(receiveString());
+            } else {
+                System.out.println(ResultCode.values()[receive]);
+            }
+        } 
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void send(String s) {
@@ -228,20 +234,6 @@ public class ClientMain {
         buffer.flip();
         return buffer.asIntBuffer().get();
     }
-    
-    private static void showPost(String input) throws IOException {
-        if (receiveInt()!=OK.getCode())
-            return;
-        System.out.println("< Titolo: " + receiveString());
-        System.out.println("< Contenuto: " + receiveString());
-        System.out.println("< Voti: " + receiveInt() + " positivi, " + receiveInt() + " negativi");
-        System.out.println("< Commenti:");
-        int loop = receiveInt();
-        for (int i=0; i<loop; i++)
-            System.out.println("    " + receiveString() + ": " + receiveString());
-        return;
-    }
-    private static void listFollowing(String input) throws IOException {
-        
-    }
+
+   
 }

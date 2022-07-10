@@ -18,7 +18,7 @@ public class ServerUtils {
 
     public static void sendString(SocketChannel clientChannel, String msg) throws IOException{
         ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-
+        System.out.println(msg.getBytes().length);
         sendInt(clientChannel, msg.getBytes().length);
         while(buffer.hasRemaining())
             clientChannel.write(buffer);
@@ -35,6 +35,7 @@ public class ServerUtils {
 
       
       }
+      //Questa funzione controlla se un int è positivo, negativo, o se deve essere diverso da zero, in base al valore di flag
       public static boolean intToStringChecker(String str, BitSet bs) {
           int i;
         try {
@@ -53,11 +54,8 @@ public class ServerUtils {
 
 
   }
-    public static boolean stringChecker(String str) {
-        if (str.isEmpty() || str.trim().length()==0 || str.trim().isEmpty())
-            return true;
-        return false;
-    }
+
+
     public static String[] fixArray(String clientRequest) {
         String[] splitted = clientRequest.split("(?=\"[^\"].*\")");
         if (splitted.length==1)
