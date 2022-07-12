@@ -42,6 +42,7 @@ public class ClientSettings {
          }
          else {
             System.out.println("File di configurazione non trovato, uso valori di default");
+            setDefaults();
          }
       } catch (Exception e) {
          e.printStackTrace();

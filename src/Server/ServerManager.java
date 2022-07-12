@@ -187,7 +187,7 @@ public class ServerManager {
    }
 
    public static int ratePost(User u, Post post, int vote) {
-      if (post.getAuthor().equals(u))
+      if (post.getAuthor().equals(u.getUsername()))
          return -2;
       if (post.getLikersList().containsKey(u) || post.getDislikersList().containsKey(u))
          return -3;

@@ -60,16 +60,36 @@ public class ServerSettings {
          }
          else {
             System.out.println("File di configurazione non trovato, uso valori di default");
+            setDefaults();
          }
    }
    catch (Exception e)
    {
       System.out.println("Errore nel file di configurazione");
+      setDefaults();
       return;
    }
    return;
 }
+   private void setDefaults() {
+      serverAddress = InetAddress.getLoopbackAddress().toString();
+      TCPPort = 50000;
+      UDPPort = 50001;
+      
+      multicastAddress = "239.255.32.32";
+      multicastPort = 50002;
 
+      RMIAddress = InetAddress.getLoopbackAddress().toString();
+      RMIPort = 50003;
+      RMIName = "ServerRemoteInterface";
+
+      authorPercentage = 50;
+      socketTimeout = -1;
+      cacheSize = 10;
+      storagePath = "/tmp";
+      rewardDelayTime = -1;
+      columnSize = 10;
+   }
 
    private int checkValidPort(int port, int defaultValue) {
       if (port < 0) {
