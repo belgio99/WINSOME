@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import Server.ServerManager;
-import Server.Configs.DefaultValues;
+import Server.Configs.Settings;
 import Server.RMI.Registration.RemoteService;
 
 public class ServerMain {
@@ -25,6 +25,7 @@ public class ServerMain {
    public static ServerSocketChannel serverSocketChannel;
 
    public static void main(String[] args) {
+
       System.out.println("Avvio server...");
       ExecutorService threadPool = Executors.newCachedThreadPool();
       Selector selector = ServerManager.getSelector();
@@ -34,17 +35,17 @@ public class ServerMain {
       try {
          serverSocketChannel = ServerSocketChannel.open();
          serverSocketChannel.configureBlocking(false);
-         serverSocketChannel.socket().bind(new InetSocketAddress(DefaultValues.serverval.TCPPort));
+         serverSocketChannel.socket().bind(new InetSocketAddress(Settings.serverSettings.TCPPort));
          
          serverSocketChannel.configureBlocking(false);
          serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
          //buffer = ByteBuffer.allocate(1024);
-         String multicastAddress = DefaultValues.serverval.multicastAddress + ":" + DefaultValues.serverval.multicastPort;
+         String multicastAddress = Settings.serverSettings.multicastAddress + ":" + Settings.serverSettings.multicastPort;
          ByteBuffer multicastBuffer = ByteBuffer.wrap(multicastAddress.getBytes());
          
          RemoteService regService = new RemoteService();
-         Registry r1 = LocateRegistry.createRegistry(DefaultValues.serverval.RMIPort);
-         r1.bind(DefaultValues.serverval.RMIName, regService);
+         Registry r1 = LocateRegistry.createRegistry(Settings.serverSettings.RMIPort);
+         r1.bind(Settings.serverSettings.RMIName, regService);
 
          //Registry r2 = LocateRegistry.createRegistry(DefaultValues.client.RMIPort);
          //Mettere il follow service
@@ -58,7 +59,7 @@ public class ServerMain {
                   selector.close();
                   serverSocketChannel.close();
                   UnicastRemoteObject.unexportObject(regService, false);
-                  r1.unbind(DefaultValues.serverval.RMIName);
+                  r1.unbind(Settings.serverSettings.RMIName);
                   Thread.sleep(200);
                   System.out.println("Shutting down ...");
                   ServerManager.shutdownServer();

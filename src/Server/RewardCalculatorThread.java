@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import Server.Configs.DefaultValues;
+import Server.Configs.Settings;
 import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.ServerUtils;
@@ -33,7 +33,7 @@ public class RewardCalculatorThread implements Runnable{
          if (isBetweenDates(p.getLastUpdateTimestamp())) {
             HashSet<User> personAnalyzed = analyze(p);
          p.increaseIterations();
-         double authorReward = round((reward * DefaultValues.serverval.authorPercentage)/100,1);
+         double authorReward = round((reward * Settings.serverSettings.authorPercentage)/100,1);
          User author = ServerManager.findUserByUsername(p.getAuthor());
          if (author == null) return;
          author.addToWincoinList(reward);

@@ -17,8 +17,9 @@ import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import Server.RMI.FollowService.CallbackService;
+//import Server.RMI.FollowService.CallbackService;
 import Server.utils.Comment;
+import Server.utils.CallbackService;
 import Server.utils.Post;
 import Server.utils.User;
 
@@ -134,13 +135,34 @@ public class ServerManager {
       if (userToFollow == null) return -1;
       u.getFollowing().add(userToFollow);
       userToFollow.getFollowers().add(u);
+      CallbackService service = callbacksMap.get(userToFollow);
+      if (service != null) {
+         try {
+         service.notifyNewFollower(u.getUsername());
+         }
+         catch (Exception e)
+         {
+            return 0;
+         }
+      }
       return 0;
    }
    public static int unfollowUser(User u, String usernameToUnfollow) {
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
       if (userToUnfollow == null) return -1;
-      if (u.getFollowing().remove(userToUnfollow) && userToUnfollow.getFollowers().remove(u))
+      if (u.getFollowing().remove(userToUnfollow) && userToUnfollow.getFollowers().remove(u)) {
+         CallbackService service = callbacksMap.get(userToUnfollow);
+         if (service != null) {
+            try {
+               service.notifyNewUnfollower(u.getUsername());
+            }
+            catch (Exception e)
+            {
+               return 0;
+            }
+         }
          return 0;
+      }
       return 1;
    }
 
@@ -252,19 +274,36 @@ public class ServerManager {
       r1.shutdown();
       database.saveDatabase();
    }
-   public static void addCallback(String username, CallbackService service) throws NullPointerException {
+
+   public static LinkedList<String> receiveFollowersList(String username) {
+      User u = database.findUserByUsername(username);
+      if (u == null) return null;
+      ConcurrentLinkedQueue<User> queue = u.getFollowers();
+      LinkedList<String> returnList = new LinkedList<>();
+      Iterator<User> itr = queue.iterator();
+      while (itr.hasNext()) {
+         returnList.add(itr.next().getUsername());
+      }
+      return returnList;
+
+   }
+      
+
+
+   public static void registerForCallback(String username, CallbackService service) throws NullPointerException {
       User u = database.findUserByUsername(username);
       if (u == null) throw new NullPointerException();
-      callbacksMap.put(u, service);
+      callbacksMap.putIfAbsent(u, service);
       //callbacksMap.put(username, service);
 
   }
 
-  public static void removeCallback(String username, CallbackService service) throws NullPointerException{
+  public static void unregisterForCallback(String username, CallbackService service) throws NullPointerException {
       if (username == null) 
          throw new NullPointerException();
       callbacksMap.remove(username, service);
   }
-
-
 }
+
+
+

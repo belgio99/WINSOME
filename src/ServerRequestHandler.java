@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Server.ServerManager;
-import Server.Configs.DefaultValues;
+import Server.Configs.Settings;
 import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.Transaction;
@@ -294,7 +294,7 @@ public class ServerRequestHandler implements Runnable {
       int numPostsToShow = 10;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.viewBlog(u).iterator();
-      int columnSize = DefaultValues.serverval.columnSize;
+      int columnSize = Settings.serverSettings.columnSize;
       msg.append("< ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");
@@ -443,7 +443,7 @@ public class ServerRequestHandler implements Runnable {
       int numPostsToShow = 10;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.showFeed(u).iterator();
-      int columnSize = DefaultValues.serverval.columnSize;
+      int columnSize = Settings.serverSettings.columnSize;
       msg.append("< ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");

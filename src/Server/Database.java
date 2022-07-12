@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import Server.Configs.DefaultValues;
+import Server.Configs.Settings;
 import Server.utils.Post;
 import Server.utils.User;
 
@@ -45,9 +45,9 @@ public class Database {
       
    }
    public void loadDatabaseFromFile() {
-      File userDBFile = new File(DefaultValues.serverval.databasePath + "/userdb.json");
-      File postDBFile = new File(DefaultValues.serverval.databasePath + "/postdb.json");
-      File globalTagsListFile = new File(DefaultValues.serverval.databasePath + "/globaltagslist.json");
+      File userDBFile = new File(Settings.serverSettings.storagePath + "/userdb.json");
+      File postDBFile = new File(Settings.serverSettings.storagePath + "/postdb.json");
+      File globalTagsListFile = new File(Settings.serverSettings.storagePath + "/globaltagslist.json");
       if (!userDBFile.exists() || !postDBFile.exists() || !globalTagsListFile.exists()) {
          System.out.println("Impossibile caricare il database!");
          return;
@@ -82,9 +82,9 @@ public class Database {
    }
 
    public void saveDatabaseToFile() {
-      File userDBFile = new File(DefaultValues.serverval.databasePath + "/userdb.json");
-      File postDBFile = new File(DefaultValues.serverval.databasePath + "/postdb.json");
-      File globalTagsListFile = new File(DefaultValues.serverval.databasePath + "/globaltagslist.json");
+      File userDBFile = new File(Settings.serverSettings.storagePath + "/userdb.json");
+      File postDBFile = new File(Settings.serverSettings.storagePath + "/postdb.json");
+      File globalTagsListFile = new File(Settings.serverSettings.storagePath + "/globaltagslist.json");
       try (FileWriter writer = new FileWriter(userDBFile)) {
          gson.toJson(userDB, writer);
       }
@@ -161,7 +161,7 @@ public class Database {
 
 
    public boolean saveDatabase() {
-      try (FileWriter writer = new FileWriter(DefaultValues.serverval.databasePath+"/database.json")){
+      try (FileWriter writer = new FileWriter(Settings.serverSettings.storagePath+"/database.json")){
          gson.toJson(database, writer);
          writer.flush();
       } 
@@ -170,7 +170,7 @@ public class Database {
          e.printStackTrace();
          return false;
       }
-      try (FileWriter writer2 = new FileWriter(DefaultValues.serverval.databasePath+"/userdb.json")) {
+      try (FileWriter writer2 = new FileWriter(Settings.serverSettings.storagePath+"/userdb.json")) {
          gson.toJson(userDB, writer2);
          writer2.flush();
       }
@@ -179,7 +179,7 @@ public class Database {
          e.printStackTrace();
          return false;
       }
-      try (FileWriter writer3 = new FileWriter(DefaultValues.serverval.databasePath+"/analyzelist.json")) {
+      try (FileWriter writer3 = new FileWriter(Settings.serverSettings.storagePath+"/analyzelist.json")) {
          gson.toJson(analyzeList, writer3);
          return true;
       }

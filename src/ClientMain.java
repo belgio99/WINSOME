@@ -5,14 +5,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 import Server.ServerRemoteInterface;
-import Server.Configs.DefaultValues;
-import Server.utils.ResultCode;
-
-import static Server.utils.ResultCode.*;
+import Server.Configs.Settings;
+import Server.utils.CallbackService;
+import Server.utils.NotifyClient;
 
 public class ClientMain {
     public static final String serverName = "localhost";
@@ -21,19 +21,19 @@ public class ClientMain {
     // private LinkedList<String> tags;
     private static SocketChannel clientSocketChannel;
     public static ServerRemoteInterface remote;
-    public static final int port = DefaultValues.serverval.TCPPort;
     private static Boolean isUserLoggedIn = false;
+    private static LinkedList<String> followersList;
+    private static CallbackService service;
+    private static CallbackService stub;
 
     public static void main(String[] args) throws Exception {
-
         try {
             Thread.sleep(2000);
-            clientSocketChannel = SocketChannel.open(
-                    new InetSocketAddress(DefaultValues.serverval.serverAddress, DefaultValues.serverval.TCPPort));
+            clientSocketChannel = SocketChannel.open(new InetSocketAddress(Settings.clientSettings.serverAddress, Settings.clientSettings.TCPPort));
             clientSocketChannel.configureBlocking(true);
             buffer = ByteBuffer.allocate(1024);
-            Registry r1 = LocateRegistry.getRegistry(DefaultValues.client.RMIAddress, DefaultValues.serverval.RMIPort);
-            remote = (ServerRemoteInterface) r1.lookup(DefaultValues.serverval.RMIName);
+            Registry r1 = LocateRegistry.getRegistry(Settings.clientSettings.RMIAddress, Settings.clientSettings.RMIPort);
+            remote = (ServerRemoteInterface) r1.lookup(Settings.clientSettings.RMIName);
             
 
 
@@ -52,6 +52,10 @@ public class ClientMain {
         } catch (IOException e) {
             System.err.println("non trovo il server!");
         }
+        service = new NotifyClient(followersList);
+        stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
+        //ClientMulticastThread clientMulticastThread = new ClientMulticastThread("1.0.0.0");
+        followersList = new LinkedList<>();
         Scanner scanner = new Scanner(System.in);
         String input;
         System.out.println("Inserire l'input...");
@@ -74,6 +78,9 @@ public class ClientMain {
                         if (receiveString().equals("Operazione completata")) {
                             isUserLoggedIn = true;
                             System.out.println("< Operazione completata");
+                            followersList.clear();
+                            followersList.addAll(remote.receiveFollowersList(splitted[1]));
+                            remote.registerForCallback(splitted[1], stub);
                         } else {
                             System.out.println("< Login fallito!"); //Ricevo la stringa con il messaggio di errore
                         }
@@ -89,6 +96,7 @@ public class ClientMain {
                         send(input);
                         if (receiveString().equals("Operazione completata")) {
                             isUserLoggedIn = false;
+                            remote.unregisterForCallback(splitted[1], stub);
                             System.out.println("< Operazione completata");
                         } else {
                             System.out.println("< Logout fallito!"); //Ricevo la stringa con il messaggio di errore
@@ -170,12 +178,17 @@ public class ClientMain {
 
     private static void register(String input) {
         String splittedInput[] = input.split(" ");
-        String username = splittedInput[1];
-        String password = splittedInput[2];
+        String username = splittedInput[1].trim().toLowerCase();
+        String password = splittedInput[2].trim();
         LinkedList<String> tagsList = new LinkedList<>();
-        // Da mettere se la pw è vuota o è di lunghezza 0.
-        for (int i = 3; i < splittedInput.length; i++)
-            tagsList.add(splittedInput[i]);
+        // Da mettere se la user e pass sono vuoti o è di lunghezza 0 o superiore a 20.
+        if (username.isEmpty() || password.isEmpty() || username.length() > 20 || password.length() > 20) {
+            System.out.println("< Username o password non validi! Lunghezza massima ammessa: 20 caratteri");
+            return;
+        }
+        for (int i = 3; i < splittedInput.length; i++) {
+            tagsList.add(splittedInput[i].trim().toLowerCase());
+        }
         try {
             int score = remote.registerUser(username, password, tagsList);
             if (score == -1)
@@ -188,20 +201,6 @@ public class ClientMain {
             e.printStackTrace();
         }
 
-    }
-
-    private static void getServerAnswer() {
-        try {
-            int receive = receiveInt();
-            if (receive == OK.getCode()) {
-                System.out.println(receiveString());
-            } else {
-                System.out.println(ResultCode.values()[receive]);
-            }
-        } 
-        catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private static void send(String s) {

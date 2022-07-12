@@ -9,7 +9,8 @@ import java.nio.IntBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.BitSet;
 
-import Server.Configs.DefaultValues;
+import Server.Configs.Settings;
+import Server.Configs.ServerSettings;
 
 public class ServerUtils {
 
@@ -70,8 +71,8 @@ public class ServerUtils {
      public synchronized static void sendUDPMessage(String message) {
         try {
             DatagramSocket socket = new DatagramSocket();
-            InetAddress address = InetAddress.getByName(DefaultValues.serverval.multicastAddress);
-            int port = DefaultValues.serverval.multicastPort;
+            InetAddress address = InetAddress.getByName(ServerSettings.serverAddress);
+            int port = Settings.serverSettings.multicastPort;
             DatagramPacket packet = new DatagramPacket(message.getBytes(), message.length(), address, port);
             socket.send(packet);
             socket.close();
