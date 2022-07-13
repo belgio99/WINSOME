@@ -20,10 +20,10 @@ import Server.utils.User;
 
 
 public class Database {
-   private final ConcurrentHashMap<User, LinkedList<Integer>> database;
-   private final ConcurrentHashMap<String, User> userDB; // username -> user
-   private final ConcurrentHashMap<Integer,Post> postDB; // postID -> post
-   private final ConcurrentHashMap<String, LinkedList<String>> globalTagsList;
+
+   private ConcurrentHashMap<String, User> userDB; // username -> user
+   private ConcurrentHashMap<Integer,Post> postDB; // postID -> post
+   private ConcurrentHashMap<String, LinkedList<String>> globalTagsList;
    private final ConcurrentLinkedQueue<Post> analyzeList;
 /*    private final ConcurrentHashMap<String, LinkedList<Post>> trash;
    private final ConcurrentHashMap<String, LinkedList<String>> tags; */
@@ -32,16 +32,12 @@ public class Database {
 
 
    public Database(ConcurrentLinkedQueue<Post> analyzeList) {
-      database = new ConcurrentHashMap<>();
       postDB = new ConcurrentHashMap<>();
       globalTagsList = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
       this.analyzeList = analyzeList;
-      //trash = new ConcurrentHashMap<>();
-      //usersLogged = new ConcurrentHashMap<>();
 
       gson = new GsonBuilder().setPrettyPrinting().create();
-      //loadDatabase();
       
    }
    public void loadDatabaseFromFile() {
@@ -53,31 +49,31 @@ public class Database {
          return;
       }
       try (FileReader reader = new FileReader(userDBFile)) {
-         database.clear();
-         Type type = new TypeToken<ConcurrentHashMap<User, LinkedList<Integer>>>(){}.getType();
-         database.putAll(gson.fromJson(reader, type));
+         userDB.clear();
+         Type type = new TypeToken<ConcurrentHashMap<String, User>>(){}.getType();
+         userDB = gson.fromJson(reader, type);
       }
       catch (Exception e) {
          System.out.println("File del database non presente o non valido.");
-         return;
+         userDB = new ConcurrentHashMap<>();
       }
       try (FileReader reader = new FileReader((postDBFile))) {
          postDB.clear();
          Type type = new TypeToken<ConcurrentHashMap<Integer,Post>>(){}.getType();
-         postDB.putAll(gson.fromJson(reader, type));
+         postDB = gson.fromJson(reader, type);
       }
       catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei post!");
-         return;
+         userDB = new ConcurrentHashMap<>();
       }
       try (FileReader reader = new FileReader((globalTagsListFile))) {
          globalTagsList.clear();
          Type type = new TypeToken<ConcurrentHashMap<String, LinkedList<String>>>(){}.getType();
-         globalTagsList.putAll(gson.fromJson(reader, type));
+         globalTagsList = gson.fromJson(reader, type);
       }
       catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei tag!");
-         return;
+         userDB = new ConcurrentHashMap<>();
       }
    }
 
@@ -134,78 +130,40 @@ public class Database {
             globalTagsList.putIfAbsent(newTag, new LinkedList<String>());
             globalTagsList.get(newTag).add(newUser.getUsername());
          }
-         userDB.putIfAbsent(username, newUser);
-         return (database.putIfAbsent(newUser, new LinkedList<Integer>()) == null) ? true: false;
+         return userDB.putIfAbsent(username, newUser)==null ? true : false;
       }
 
    public boolean addPost(User author, Post post) throws NullPointerException {
-      //this needs to be done in a thread-safe way
-      if (postDB.putIfAbsent(post.getId(), post)==null) {
-         database.get(author).addFirst(post.getId());
-         return true;
-      }
-      return false;
+      if (postDB.putIfAbsent(post.getId(), post)!=null)
+         return false;
+      author.addToUserPostList((post.getId()));
+      return true;
       //updateJSON();
       //save new database to json
       
-
    }
    
    public void deletePost(Post post) throws NullPointerException {
       User author = ServerManager.findUserByUsername(post.getAuthor());
-      database.get(author).remove(post.getId());
+      author.removeFromUserPostList(post.getId());
       postDB.remove(post.getId());
       return;
    }
    
 
 
-   public boolean saveDatabase() {
-      try (FileWriter writer = new FileWriter(Settings.serverSettings.storagePath+"/database.json")){
-         gson.toJson(database, writer);
-         writer.flush();
-      } 
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         return false;
-      }
-      try (FileWriter writer2 = new FileWriter(Settings.serverSettings.storagePath+"/userdb.json")) {
-         gson.toJson(userDB, writer2);
-         writer2.flush();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         return false;
-      }
-      try (FileWriter writer3 = new FileWriter(Settings.serverSettings.storagePath+"/analyzelist.json")) {
-         gson.toJson(analyzeList, writer3);
-         return true;
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         return false;
-      }
-   }
    /*public User loginUser(String username, String password) {
       return findUserByUsername(username);
    }*/
-   public User findUserByUsername(String username) {
-      return database.keySet()
-                     .stream()
-                     .parallel()
-                     .filter(p -> p.getUsername().equals(username))
-                     .findFirst()
-                     .orElse(null);
+   public User findUserByUsername(String username) throws NullPointerException{
+      return userDB.get(username); 
    }
    public Post getPostByID(int ID) {
       return postDB.get(ID);
    }
    public LinkedList<Post> getUserPosts(User u) throws NullPointerException {
       LinkedList<Post> posts = new LinkedList<>();
-      for (Integer id : database.get(u)) {
+      for (Integer id : u.getUserPostList()) {
          posts.add(postDB.get(id));
       }
       return posts;

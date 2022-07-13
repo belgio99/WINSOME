@@ -2,7 +2,6 @@ package Server.Configs;
 
 import java.io.File;
 import java.io.FileReader;
-import java.net.InetAddress;
 import java.util.Properties;
 
 public class ClientSettings {
@@ -23,22 +22,23 @@ public class ClientSettings {
       try {
          if (configFile.exists()) {
             settings.load(new FileReader(path));
-            serverAddress = (String) settings.getOrDefault("serverAddress", InetAddress.getLoopbackAddress().toString());
-            TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPort", 50000)));
+            serverAddress = (String) settings.getOrDefault("SERVER", "localhost");
+            TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPORT", 50000)));
             TCPPort = checkValidPort(TCPPort, 50000);
 
-            UDPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("UDPPort", 50001)));
+            UDPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("UDPPORT", 50001)));
             UDPPort = checkValidPort(UDPPort, 50001);
 
-            multicastAddress = (String) settings.getOrDefault("multicastAddress", "239.255.32.32");
-            multicastPort = Integer.parseInt(String.valueOf(settings.getOrDefault("multicastPort", 50002)));
+            multicastAddress = (String) settings.getOrDefault("MULTICAST", "239.255.32.32");
+            multicastPort = Integer.parseInt(String.valueOf(settings.getOrDefault("MCASTPORT", 50002)));
             multicastPort = checkValidPort(multicastPort, 50002);
 
-            RMIAddress = (String) settings.getOrDefault("RMIAddress", InetAddress.getLoopbackAddress().toString());
-            RMIPort = Integer.parseInt(String.valueOf(settings.getOrDefault("RMIPort", 50003)));
+            RMIAddress = (String) settings.getOrDefault("RMIADDR", "localhost");
+            RMIPort = Integer.parseInt(String.valueOf(settings.getOrDefault("RMIPORT", 50003)));
             RMIPort = checkValidPort(RMIPort, 50003);
 
-            RMIName = (String) settings.getOrDefault("RMIName", "ServerRemoteInterface");
+            RMIName = (String) settings.getOrDefault("RMINAME", "ServerRemoteInterface");
+            System.out.println("File di configurazione caricato");
          }
          else {
             System.out.println("File di configurazione non trovato, uso valori di default");
@@ -51,14 +51,14 @@ public class ClientSettings {
       return;
    }
    public void setDefaults() {
-      serverAddress = InetAddress.getLoopbackAddress().toString();
+      serverAddress = "localhost";
       TCPPort = 50000;
       UDPPort = 50001;
 
       multicastAddress = "239.255.32.32";
       multicastPort = 50002;
 
-      RMIAddress = InetAddress.getLoopbackAddress().toString();
+      RMIAddress = "localhost";
       RMIPort = 50003;
       RMIName = "ServerRemoteInterface";
       return;

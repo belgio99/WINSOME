@@ -272,7 +272,7 @@ public class ServerManager {
       for (SocketChannel cc : usersLogged.keySet())
          logout(cc);
       r1.shutdown();
-      database.saveDatabase();
+      database.saveDatabaseToFile();
    }
 
    public static LinkedList<String> receiveFollowersList(String username) {

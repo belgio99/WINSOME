@@ -1,4 +1,5 @@
 package Server.utils;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -10,6 +11,7 @@ public class User {
    private ConcurrentLinkedQueue<User> following;
    private ConcurrentLinkedQueue<User> followers;
    private LinkedBlockingQueue<Transaction> wincoinList;
+   private ArrayList<Integer> userPostList;
    private double currentCompensation;
 
    public User(String username, String password, LinkedList<String> tags) {
@@ -19,13 +21,43 @@ public class User {
       this.following = new ConcurrentLinkedQueue<>();
       this.followers = new ConcurrentLinkedQueue<>();
       this.wincoinList = new LinkedBlockingQueue<>();
+      this.userPostList = new ArrayList<>();
       this.currentCompensation = 0;
       
    }
    public void addToWincoinList(double reward) {
       wincoinList.add(new Transaction(reward));
    }
-
+   public void addToUserPostList(int postId) {
+      userPostList.add(postId);
+   }
+   public void addToFollowing(User user) {
+      following.add(user);
+   }
+   public void addToFollowers(User user) {
+      followers.add(user);
+   }
+   public void addToCompensation(double compensation) {
+      currentCompensation += compensation;
+   }
+   public void removeFromCompensation(double compensation) {
+      currentCompensation -= compensation;
+   }
+   public double getCurrentCompensation() {
+      return currentCompensation;
+   }
+   public void removeFromWincoinList(double reward) {
+      wincoinList.remove(new Transaction(reward));
+   }
+   public void removeFromUserPostList(int postId) {
+      userPostList.remove(postId);
+   }
+   public void removeFromFollowing(User user) {
+      following.remove(user);
+   }
+   public void removeFromFollowers(User user) {
+      followers.remove(user);
+   }
 
    public String getUsername() {
       return this.username;
@@ -75,12 +107,8 @@ public class User {
       this.wincoinList = wincoinList;
    }
 
-   public double getCurrentCompensation() {
-      return this.currentCompensation;
-   }
-
-   public void setCurrentCompensation(double currentCompensation) {
-      this.currentCompensation = currentCompensation;
+   public ArrayList<Integer> getUserPostList() {
+      return this.userPostList;
    }
 
 

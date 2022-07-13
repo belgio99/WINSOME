@@ -28,18 +28,18 @@ public class ClientMain {
 
     public static void main(String[] args) throws Exception {
         try {
-            Thread.sleep(2000);
-            clientSocketChannel = SocketChannel.open(new InetSocketAddress(Settings.clientSettings.serverAddress, Settings.clientSettings.TCPPort));
+            // Thread.sleep(2000);
+            clientSocketChannel = SocketChannel.open(
+                    new InetSocketAddress(Settings.clientSettings.serverAddress, Settings.clientSettings.TCPPort));
             clientSocketChannel.configureBlocking(true);
             buffer = ByteBuffer.allocate(1024);
-            Registry r1 = LocateRegistry.getRegistry(Settings.clientSettings.RMIAddress, Settings.clientSettings.RMIPort);
+            Registry r1 = LocateRegistry.getRegistry(Settings.clientSettings.RMIAddress,
+                    Settings.clientSettings.RMIPort);
             remote = (ServerRemoteInterface) r1.lookup(Settings.clientSettings.RMIName);
-            
-
 
             // Registry r1 = LocateRegistry.getRegistry(DefaultValues.client.RMIAddress,
             // DefaultValues.serverval.RMIPort);
-            
+
             /*
              * socket.connect(new InetSocketAddress(serverName, port));
              * System.out.println("Sto provando a connettermi al server");
@@ -49,134 +49,152 @@ public class ClientMain {
              */
         } catch (UnknownHostException e) {
             System.err.println("Non ho trovato l'host a cui connettermi!");
+            System.exit(1);
         } catch (IOException e) {
-            System.err.println("non trovo il server!");
+            System.err.println("Non trovo il server! Chiusura...");
+            System.exit(1);
         }
         service = new NotifyClient(followersList);
         stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
-        //ClientMulticastThread clientMulticastThread = new ClientMulticastThread("1.0.0.0");
+        // ClientMulticastThread clientMulticastThread = new
+        // ClientMulticastThread("1.0.0.0");
         followersList = new LinkedList<>();
         Scanner scanner = new Scanner(System.in);
         String input;
-        System.out.println("Inserire l'input...");
+        System.out.println("Connesso a " + clientSocketChannel.getRemoteAddress());
         System.out.println("Inserire parole da inviare al server, o scrivere \"exit\" per uscire");
         System.out.print("> ");
-        while (!(input = scanner.nextLine()).trim().equalsIgnoreCase("exit")) {
-            if (input.trim().isEmpty())
-                continue;
-            // System.out.println("Sto per inviare: " + input);
-            // String[] command =
-            input = input.toLowerCase().trim();
-            String[] splitted = input.split(" ");
-            if (!isUserLoggedIn) {
-                switch (splitted[0]) {
-                    case "register":
-                        register(input);
-                        break;
-                    case "login":
-                        send(input);
-                        if (receiveString().equals("Operazione completata")) {
-                            isUserLoggedIn = true;
-                            System.out.println("< Operazione completata");
-                            followersList.clear();
-                            followersList.addAll(remote.receiveFollowersList(splitted[1]));
-                            remote.registerForCallback(splitted[1], stub);
-                        } else {
-                            System.out.println("< Login fallito!"); //Ricevo la stringa con il messaggio di errore
-                        }
-                        break;
-                    default:
-                            System.out.println("< Comando non disponibile: attualmente è possibile solo il login o registrarsi");
-                        break;
-                }
-            }
-            else {
-                switch (splitted[0]) {
-                    case "logout":
-                        send(input);
-                        if (receiveString().equals("Operazione completata")) {
-                            isUserLoggedIn = false;
-                            remote.unregisterForCallback(splitted[1], stub);
-                            System.out.println("< Operazione completata");
-                        } else {
-                            System.out.println("< Logout fallito!"); //Ricevo la stringa con il messaggio di errore
-                        }
-                        break;
-                    default:
-                    send(input);
-                    System.out.println("< " + receiveString());
-                    
+        try {
+            while (!(input = scanner.nextLine()).trim().equalsIgnoreCase("exit")) {
+                if (input.trim().isEmpty())
+                    continue;
+                // System.out.println("Sto per inviare: " + input);
+                // String[] command =
+                input = input.toLowerCase().trim();
+                String[] splitted = input.split(" ");
+                if (!isUserLoggedIn) {
+                    switch (splitted[0]) {
+                        case "register":
+                            register(input);
+                            break;
+                        case "login":
+                            send(input);
+                            if (receiveString().equals("Operazione completata")) {
+                                isUserLoggedIn = true;
+                                System.out.println("< Operazione completata");
+                                followersList.clear();
+                                followersList.addAll(remote.receiveFollowersList(splitted[1]));
+                                remote.registerForCallback(splitted[1], stub);
+                            } else {
+                                System.out.println("< Login fallito!"); // Ricevo la stringa con il messaggio di errore
+                            }
+                            break;
+                        default:
+                            System.out.println(
+                                    "< Comando non disponibile: attualmente è possibile solo il login o registrarsi");
+                            break;
+                    }
+                } else {
+                    switch (splitted[0]) {
+                        case "logout":
+                            send(input);
+                            if (receiveString().equals("Operazione completata")) {
+                                isUserLoggedIn = false;
+                                remote.unregisterForCallback(splitted[1], stub);
+                                System.out.println("< Operazione completata");
+                            } else {
+                                System.out.println("< Logout fallito!"); // Ricevo la stringa con il messaggio di errore
+                            }
+                            break;
+                        default:
+                            send(input);
+                            System.out.println("< " + receiveString());
 
-            }
-        }
-        System.out.print("> ");
-            
-/*
-            send(input);
-            int code = receiveInt();
-            if (code != OK.getCode()) {
-                System.out.println(ResultCode.values()[code]);
-                continue;
-            } else
-                switch (splitted[0]) {
-                    case "list":
-                        switch (splitted[1]) {
-                            case "user":
-                                listUsers(input);
-                            case "following":
-                                // listFollowing(input);
-                            default:
-                                // ILLEGAL_OPERATION;
-                                break;
-                        }
-                    case "show":
-                        switch (splitted[1]) {
-                            case "post":
-                                showPost(input);
-                            case "following":
-                                // listFollowing(input);
-                            default:
-                                // ILLEGAL_OPERATION;
-                                break;
-                        }
-                        break;
-                    case "post":
-                        createPost(input);
-                        break;
-                    /*
-                     * case "rewin":
-                     * case "rate":
-                     * case "wallet":
-                     * case "comment":
-                     * case "blog":
-                     * case "delete":
-                     * case "follow":
-                     * case "unfollow":
-                     * case "logout":
-                     
-                    default:
-
-                        break;
+                    }
 
                 }
-            int receive = receiveInt();
-            System.out.println(ResultCode.values()[receive]);
 
-            // System.out.println(receive);
-*/
-            buffer.clear(); // Resetto il buffer
-            /*
-             * System.out.println("Messaggio ricevuto dal server: ");
-             * System.out.println();
-             */
-            
+                System.out.print("> ");
 
+                /*
+                 * send(input);
+                 * int code = receiveInt();
+                 * if (code != OK.getCode()) {
+                 * System.out.println(ResultCode.values()[code]);
+                 * continue;
+                 * } else
+                 * switch (splitted[0]) {
+                 * case "list":
+                 * switch (splitted[1]) {
+                 * case "user":
+                 * listUsers(input);
+                 * case "following":
+                 * // listFollowing(input);
+                 * default:
+                 * // ILLEGAL_OPERATION;
+                 * break;
+                 * }
+                 * case "show":
+                 * switch (splitted[1]) {
+                 * case "post":
+                 * showPost(input);
+                 * case "following":
+                 * // listFollowing(input);
+                 * default:
+                 * // ILLEGAL_OPERATION;
+                 * break;
+                 * }
+                 * break;
+                 * case "post":
+                 * createPost(input);
+                 * break;
+                 * /*
+                 * case "rewin":
+                 * case "rate":
+                 * case "wallet":
+                 * case "comment":
+                 * case "blog":
+                 * case "delete":
+                 * case "follow":
+                 * case "unfollow":
+                 * case "logout":
+                 * 
+                 * default:
+                 * 
+                 * break;
+                 * 
+                 * }
+                 * int receive = receiveInt();
+                 * System.out.println(ResultCode.values()[receive]);
+                 * 
+                 * // System.out.println(receive);
+                 */
+                buffer.clear(); // Resetto il buffer
+                /*
+                 * System.out.println("Messaggio ricevuto dal server: ");
+                 * System.out.println();
+                 */
+
+            }
+        } catch (IOException e) {
+            System.err.println("Errore di I/O! Probabilmente non si è più connessi al server. Chiusura...");
+            System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        } finally {
+            try {
+                clientSocketChannel.close();
+            } catch (IOException e) {
+                System.err.println("Errore di I/O! Probabilmente non si è più connessi al server. Chiusura...");
+                System.exit(1);
+            }
         }
         scanner.close();
 
     }
 
-    private static void register(String input) {
+    private static void register(String input) throws Exception {
         String splittedInput[] = input.split(" ");
         String username = splittedInput[1].trim().toLowerCase();
         String password = splittedInput[2].trim();
@@ -189,40 +207,26 @@ public class ClientMain {
         for (int i = 3; i < splittedInput.length; i++) {
             tagsList.add(splittedInput[i].trim().toLowerCase());
         }
-        try {
             int score = remote.registerUser(username, password, tagsList);
             if (score == -1)
                 System.out.println("Registrazione Fallita!");
-            else 
+            else
                 System.out.println("Registrazione riuscita! Il punteggio di sicurezza della tua password è: " + score);
-        }
 
-        catch (Exception e) {
-            e.printStackTrace();
-        }
 
     }
 
-    private static void send(String s) {
+    private static void send(String s) throws IOException {
         buffer = ByteBuffer.wrap(s.getBytes());
-
-        try {
             while (buffer.hasRemaining())
                 clientSocketChannel.write(buffer);
-        } catch (Exception e) {
-            System.out.println("Impossibile contattare il Server");
-        }
     }
 
-    private static String receiveString() {
+    private static String receiveString() throws IOException {
         int numBytes = 0;
-        try {
             numBytes = receiveInt();
             buffer = ByteBuffer.allocate(numBytes);
             clientSocketChannel.read(buffer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         buffer.flip();
         return new String(buffer.array(), 0, numBytes);
     }
@@ -234,5 +238,4 @@ public class ClientMain {
         return buffer.asIntBuffer().get();
     }
 
-   
 }

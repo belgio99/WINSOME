@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -53,7 +54,6 @@ public class ServerMain {
          Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                Selector selector = ServerManager.getSelector();
-               System.out.println("Esco!");
                
                try {
                   selector.close();
@@ -61,7 +61,6 @@ public class ServerMain {
                   UnicastRemoteObject.unexportObject(regService, false);
                   r1.unbind(Settings.serverSettings.RMIName);
                   Thread.sleep(200);
-                  System.out.println("Shutting down ...");
                   ServerManager.shutdownServer();
     
                 } catch (Exception e) {
@@ -79,8 +78,7 @@ public class ServerMain {
          System.exit(1);
       }
        catch (AlreadyBoundException e) {
-          System.err.println("Errore! non torna");
-          e.printStackTrace();
+          System.err.println("Errore! L'indirizzo è già stato utilizzato!");
           System.exit(1);
        }
       System.out.println("Server pronto");
@@ -130,6 +128,8 @@ public class ServerMain {
          catch (IOException e) {
             System.err.println("Errore di I/O!");
             //continue;
+         } catch (ClosedSelectorException e) {
+            System.out.println("Spegnimento del server...");
          }
       }
       
