@@ -32,7 +32,7 @@ public class ClientMulticastThread implements Runnable {
          multicastSocket.setReuseAddress(true);
          multicastSocket.joinGroup(new InetSocketAddress(address, port),networkInterface);
          DatagramPacket p = new DatagramPacket(new byte[1024], 1024);
-         while (Thread.currentThread().isInterrupted()) {
+         while (!Thread.currentThread().isInterrupted()) {
             try {
                multicastSocket.receive(p);
             }
