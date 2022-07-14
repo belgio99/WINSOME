@@ -24,25 +24,24 @@ import Server.utils.Post;
 import Server.utils.User;
 
 public class ServerManager {
-   //private static final Gson gson = new Gson();
+   // private static final Gson gson = new Gson();
    private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
    private static final Database database = new Database(analyzeList);
    private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>();
    private static final RewardCalculator r1;
-   
+
    private static Selector selector;
    private static final ConcurrentHashMap<SocketChannel, User> usersLogged = new ConcurrentHashMap<>();
-   
 
    static {
       try {
          selector = Selector.open();
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
          e.printStackTrace();
       }
       r1 = new RewardCalculator(analyzeList);
    }
+
    public static void startupServer() {
       database.loadDatabaseFromFile();
       return;
@@ -52,56 +51,66 @@ public class ServerManager {
       database.saveDatabaseToFile();
       return;
    }
+
    public static int register(String username, String password, LinkedList<String> tagsList) {
       if (!database.registerUser(username, password, tagsList))
          return -1;
       int score = 0;
-      //se la password è lunga, aumenta il punteggio di 1
-      if (password.length() > 12) {
+      // se la password è lunga più di 8 caratteri, aumenta il punteggio di 1
+      if (password.length() > 8) {
          score += 1;
-      } //se la password contiene una combinazione di caratteri maiuscoli e minuscoli, aumenta il punteggio di 1
-      if (password.matches("[a-zA-Z]+")) {
+      } // se la password contiene dei caratteri minuscoli, aumenta il punteggio di 1
+      if (password.matches("[a-z]+")) {
          score += 1;
-      } //se la password contiene un numero, aumenta il punteggio di 1
+      } // se la password contiene dei caratteri maiuscoli, aumenta il punteggio di 1
+      if (password.matches("[A-Z]+")) {
+         score += 1;
+      }
+      // se la password contiene dei numeri, aumenta il punteggio di 1
       if (password.matches("[0-9]+")) {
          score += 1;
-      } //se la password contiene un carattere speciale, aumenta il punteggio di 1
+      } // se la password contiene un carattere speciale, aumenta il punteggio di 1
       if (password.matches("[^a-zA-Z0-9]+")) {
          score += 1;
       }
+
       return score;
    }
+
    public static User login(String username, String password, SocketChannel clientChannel) {
-       User user = database.findUserByUsername(username);
-       if (user == null) return null;
-       if (!password.equals(user.getPassword())) return null;
-       if (usersLogged.get(clientChannel) == null) {
+      User user = database.findUserByUsername(username);
+      if (user == null)
+         return null;
+      if (!password.equals(user.getPassword()))
+         return null;
+      if (usersLogged.get(clientChannel) == null) {
          usersLogged.put(clientChannel, user);
          return user;
-       }
-       else return null;
-      
+      } else
+         return null;
+
    }
+
    public static int logout(SocketChannel clientChannel) {
-      //database.logoutUser(u);
+      // database.logoutUser(u);
       return removeUserLogged(clientChannel);
 
    }
+
    public static Post createPost(String title, String content, User author) {
-      Post post = new Post(database.getPreviousMaxPostID()+1, author.getUsername(), title, content);
+      Post post = new Post(database.getPreviousMaxPostID() + 1, author.getUsername(), title, content);
       database.addPost(author, post);
       analyzeList.add(post);
-      //database.saveDatabase();
+      // database.saveDatabase();
       return post;
    }
+
    public static int deletePost(Post post) {
-      try { 
+      try {
          database.deletePost(post);
          analyzeList.remove(post);
          return 0;
-      }
-      catch (Exception e)
-      {
+      } catch (Exception e) {
          return -1;
       }
 
@@ -111,53 +120,53 @@ public class ServerManager {
       return database.getPostByID(ID);
    }
 
-
    public static User findUserByUsername(String username) {
       return database.findUserByUsername(username);
    }
+
    public static Selector getSelector() {
       return selector;
    }
+
    public static int removeUserLogged(SocketChannel clientChannel) {
       try {
          return usersLogged.remove(clientChannel) == null ? -1 : 0;
-      }
-      catch (NullPointerException e)
-      {
+      } catch (NullPointerException e) {
          return -1;
       }
    }
+
    public static User getUserLogged(SocketChannel clientChannel) {
       return usersLogged.get(clientChannel);
    }
+
    public static int followUser(User u, String usernameToFollow) {
       User userToFollow = database.findUserByUsername(usernameToFollow);
-      if (userToFollow == null) return -1;
+      if (userToFollow == null)
+         return -1;
       u.getFollowing().add(userToFollow);
       userToFollow.getFollowers().add(u);
       CallbackService service = callbacksMap.get(userToFollow);
       if (service != null) {
          try {
-         service.notifyNewFollower(u.getUsername());
-         }
-         catch (Exception e)
-         {
+            service.notifyNewFollower(u.getUsername());
+         } catch (Exception e) {
             return 0;
          }
       }
       return 0;
    }
+
    public static int unfollowUser(User u, String usernameToUnfollow) {
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
-      if (userToUnfollow == null) return -1;
+      if (userToUnfollow == null)
+         return -1;
       if (u.getFollowing().remove(userToUnfollow) && userToUnfollow.getFollowers().remove(u)) {
          CallbackService service = callbacksMap.get(userToUnfollow);
          if (service != null) {
             try {
                service.notifyNewUnfollower(u.getUsername());
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                return 0;
             }
          }
@@ -171,16 +180,17 @@ public class ServerManager {
    }
 
    public static int addComment(User u, Post post, String content) {
-      if (post == null) return -1;
+      if (post == null)
+         return -1;
       Comment comment = new Comment(u, content);
       post.getCommentsList().add(comment);
       analyzeList.add(post);
       return 0;
    }
 
-   
    public static int rewinPost(User u, Post post) {
-      if (post == null) return -1;
+      if (post == null)
+         return -1;
       database.addPost(u, post);
       post.getRewinList().add(u);
       return 0;
@@ -194,49 +204,51 @@ public class ServerManager {
       if (!database.getUserPosts(u).contains(post))
          return -4;
       switch (vote) {
-      case 1:
-         post.getLikersList().put(u, Instant.now()); break;
+         case 1:
+            post.getLikersList().put(u, Instant.now());
+            break;
 
-      case -1:
-         post.getDislikersList().put(u, Instant.now()); break;
-      default:
-         return -1;
-         }
-      analyzeList.add(post); 
-      return 0;
+         case -1:
+            post.getDislikersList().put(u, Instant.now());
+            break;
+         default:
+            return -1;
       }
+      analyzeList.add(post);
+      return 0;
+   }
 
    public static double getWalletAmount(User u) {
       return u.getCurrentCompensation();
-      
+
    }
 
    public static double getBTCValue() {
       String randomURL = "https://www.random.org/decimal-fractions/?num=1&dec=5&col=2&format=plain&rnd=new";
       StringBuilder stringBuilder = new StringBuilder();
       try {
-          String encoding = "ISO-8859-1";
-          URL u = new URL(randomURL);
-          URLConnection uc = u.openConnection();
-          String contentType = uc.getContentType();
-          int encodingStart = contentType.indexOf("charset=");
-          if (encodingStart != -1) {
-              encoding = contentType.substring(encodingStart + 8);
-          }
-          InputStream in = new BufferedInputStream(uc.getInputStream());
-          Reader r = new InputStreamReader(in, encoding);
-          int c;
-          while ((c = r.read()) != -1) {
-              stringBuilder.append((char) c);
-          }
-          r.close();
+         String encoding = "ISO-8859-1";
+         URL u = new URL(randomURL);
+         URLConnection uc = u.openConnection();
+         String contentType = uc.getContentType();
+         int encodingStart = contentType.indexOf("charset=");
+         if (encodingStart != -1) {
+            encoding = contentType.substring(encodingStart + 8);
          }
-         catch (Exception e) {
-            e.printStackTrace();
+         InputStream in = new BufferedInputStream(uc.getInputStream());
+         Reader r = new InputStreamReader(in, encoding);
+         int c;
+         while ((c = r.read()) != -1) {
+            stringBuilder.append((char) c);
          }
-          return Double.parseDouble(stringBuilder.toString());
+         r.close();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      return Double.parseDouble(stringBuilder.toString());
 
    }
+
    public static HashSet<String> listUsers(User u) {
       LinkedList<String> userTags = u.getTags();
       HashSet<String> returnSet = new HashSet<>();
@@ -247,7 +259,7 @@ public class ServerManager {
          while (itr2.hasNext())
             returnSet.add(itr2.next());
       }
-         
+
       return returnSet;
 
    }
@@ -260,10 +272,11 @@ public class ServerManager {
       }
       return returnSet;
    }
+
    public static LinkedList<Post> showFeed(User u) {
       LinkedList<Post> feedList = new LinkedList<>();
-      for (User followingUser: u.getFollowing())
-      feedList.addAll(database.getUserPosts(followingUser));
+      for (User followingUser : u.getFollowing())
+         feedList.addAll(database.getUserPosts(followingUser));
       Collections.shuffle(feedList);
       return feedList;
    }
@@ -277,7 +290,8 @@ public class ServerManager {
 
    public static LinkedList<String> receiveFollowersList(String username) {
       User u = database.findUserByUsername(username);
-      if (u == null) return null;
+      if (u == null)
+         return null;
       ConcurrentLinkedQueue<User> queue = u.getFollowers();
       LinkedList<String> returnList = new LinkedList<>();
       Iterator<User> itr = queue.iterator();
@@ -287,23 +301,19 @@ public class ServerManager {
       return returnList;
 
    }
-      
-
 
    public static void registerForCallback(String username, CallbackService service) throws NullPointerException {
       User u = database.findUserByUsername(username);
-      if (u == null) throw new NullPointerException();
+      if (u == null)
+         throw new NullPointerException();
       callbacksMap.putIfAbsent(u, service);
-      //callbacksMap.put(username, service);
+      // callbacksMap.put(username, service);
 
-  }
+   }
 
-  public static void unregisterForCallback(String username, CallbackService service) throws NullPointerException {
-      if (username == null) 
+   public static void unregisterForCallback(String username, CallbackService service) throws NullPointerException {
+      if (username == null)
          throw new NullPointerException();
       callbacksMap.remove(username, service);
-  }
+   }
 }
-
-
-

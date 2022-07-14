@@ -56,8 +56,8 @@ public class ClientMain {
         }
         service = new NotifyClient(followersList);
         stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
-        // ClientMulticastThread clientMulticastThread = new
-        // ClientMulticastThread("1.0.0.0");
+         ClientMulticastThread clientMulticastThread = new ClientMulticastThread(Settings.clientSettings.multicastAddress, Settings.clientSettings.UDPPort);
+        clientMulticastThread.run();
         followersList = new LinkedList<>();
         Scanner scanner = new Scanner(System.in);
         String input;
@@ -191,7 +191,7 @@ public class ClientMain {
             }
         }
         scanner.close();
-
+        clientMulticastThread.close();
     }
 
     private static void register(String input) throws Exception {
