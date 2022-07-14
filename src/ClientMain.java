@@ -9,6 +9,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.Scanner;
 
+import org.omg.CosNaming._BindingIteratorImplBase;
+
 import Server.ServerRemoteInterface;
 import Server.Configs.Settings;
 import Server.utils.CallbackService;
@@ -56,8 +58,11 @@ public class ClientMain {
         }
         service = new NotifyClient(followersList);
         stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
-         ClientMulticastThread clientMulticastThread = new ClientMulticastThread(Settings.clientSettings.multicastAddress, Settings.clientSettings.UDPPort);
-        clientMulticastThread.run();
+        String mcastInfos = receiveString();
+        String mcastAddress = mcastInfos.split(":")[0];
+        int mcastPort = Integer.parseInt(mcastInfos.split(":")[1]);
+        Thread multicastThread = new Thread(new ClientMulticastThread(mcastAddress, mcastPort));
+        multicastThread.start();
         followersList = new LinkedList<>();
         Scanner scanner = new Scanner(System.in);
         String input;
@@ -72,6 +77,8 @@ public class ClientMain {
                 // String[] command =
                 input = input.toLowerCase().trim();
                 String[] splitted = input.split(" ");
+                if (splitted[0].equals("help"))
+                    send(input);
                 if (!isUserLoggedIn) {
                     switch (splitted[0]) {
                         case "register":
@@ -97,15 +104,7 @@ public class ClientMain {
                 } else {
                     switch (splitted[0]) {
                         case "logout":
-                            send(input);
-                            if (receiveString().equals("Operazione completata")) {
-                                isUserLoggedIn = false;
-                                remote.unregisterForCallback(splitted[1], stub);
-                                System.out.println("< Operazione completata");
-                            } else {
-                                System.out.println("< Logout fallito!"); // Ricevo la stringa con il messaggio di errore
-                            }
-                            break;
+                            logout(input);
                         default:
                             send(input);
                             System.out.println("< " + receiveString());
@@ -190,8 +189,12 @@ public class ClientMain {
                 System.exit(1);
             }
         }
+        if (isUserLoggedIn) {
+            logout("logout");
+            isUserLoggedIn = false;
+        }
         scanner.close();
-        clientMulticastThread.close();
+        multicastThread.interrupt();
     }
 
     private static void register(String input) throws Exception {
@@ -207,26 +210,36 @@ public class ClientMain {
         for (int i = 3; i < splittedInput.length; i++) {
             tagsList.add(splittedInput[i].trim().toLowerCase());
         }
-            int score = remote.registerUser(username, password, tagsList);
-            if (score == -1)
-                System.out.println("Registrazione Fallita!");
-            else
-                System.out.println("Registrazione riuscita! Il punteggio di sicurezza della tua password è: " + score);
+        int score = remote.registerUser(username, password, tagsList);
+        if (score == -1)
+            System.out.println("Registrazione Fallita!");
+        else
+            System.out.println("Registrazione riuscita! Il punteggio di sicurezza della tua password è: " + score);
 
+    }
 
+    private static void logout(String input) throws IOException{
+        send(input);
+        if (receiveString().equals("Operazione completata")) {
+            isUserLoggedIn = false;
+            remote.unregisterForCallback(input.split(" ")[1], stub);
+            System.out.println("< Operazione completata");
+        } else {
+            System.out.println("< Logout fallito!"); // Ricevo la stringa con il messaggio di errore
+        }
     }
 
     private static void send(String s) throws IOException {
         buffer = ByteBuffer.wrap(s.getBytes());
-            while (buffer.hasRemaining())
-                clientSocketChannel.write(buffer);
+        while (buffer.hasRemaining())
+            clientSocketChannel.write(buffer);
     }
 
     private static String receiveString() throws IOException {
         int numBytes = 0;
-            numBytes = receiveInt();
-            buffer = ByteBuffer.allocate(numBytes);
-            clientSocketChannel.read(buffer);
+        numBytes = receiveInt();
+        buffer = ByteBuffer.allocate(numBytes);
+        clientSocketChannel.read(buffer);
         buffer.flip();
         return new String(buffer.array(), 0, numBytes);
     }

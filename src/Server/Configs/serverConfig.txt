@@ -1,0 +1,17 @@
+# Indirizzo IP del server
+IP_SERVER = "localhost"
+#
+# Porta del server
+PORT_SERVER = 8080
+#
+# Indirizzo IP del client
+IP_CLIENT = "localhost"
+#
+# Porta del client
+PORT_CLIENT = 8081
+#
+# Nome del registry
+HOST_REGISTRY = "localhost"
+#
+# Porta del registry
+PORT_REGISTRY = 8083

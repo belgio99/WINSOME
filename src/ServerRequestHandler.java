@@ -85,6 +85,8 @@ public class ServerRequestHandler implements Runnable {
          // 0 in poi sono unchecked
          // Controllo anche la stringa 1 perché serve per alcuni comandi
          switch (requestSplitted[0]) {
+            case "help":
+               response = printHelp();
             case "logout":
                response = logout();
                break;
@@ -505,5 +507,30 @@ public class ServerRequestHandler implements Runnable {
       }
       return msg.toString();
    }
-
+   private String printHelp() {
+      StringBuilder msg = new StringBuilder();
+                msg.append("< Utilizzo:\n")
+                  .append("<      register <username> <password> <tags>\n")
+                  .append("<      login <username> <password>\n")
+                  .append("<      logout\n")
+                  .append("<      list user\n")
+                  .append("<      list followers\n")
+                  .append("<      list following\n")
+                  .append("<      follow <user>\n")
+                  .append("<      unfollow <user>\n")
+                  .append("<      blog\n")
+                  .append("<      post \"<title>\" \"<content>\"\n")
+                  .append("<      show feed\n")
+                  .append("<      show post <idPost>\n")
+                  .append("<      delete <idPost>\n")
+                  .append("<      rewin <idPost>\n")
+                  .append("<      rate <idPost> <vote>\n")
+                  .append("<      comment <idPost> \"<comment>\"\n")
+                  .append("<      wallet\n")
+                  .append("<      wallet btc\n")
+                  .append("<      help\n")
+                  .append("<      exit\n");
+                  
+      return msg.toString();
+   }
 }

@@ -76,7 +76,7 @@ public class ServerSettings {
       TCPPort = 50000;
       UDPPort = 50001;
       
-      multicastAddress = "239.255.32.32";
+      multicastAddress = "239.12.0.32";
       multicastPort = 50002;
 
       RMIAddress = InetAddress.getLoopbackAddress().toString();

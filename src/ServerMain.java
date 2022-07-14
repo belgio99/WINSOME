@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import Server.ServerManager;
 import Server.Configs.Settings;
 import Server.RMI.Registration.RemoteService;
+import Server.utils.ServerUtils;
 
 public class ServerMain {
 
@@ -96,14 +97,15 @@ public class ServerMain {
                //System.out.println("La chiave è di tipo" + key.toString());
                if (key.isAcceptable()) {
                   System.out.println("La chiave è di tipo ACCEPT");
-                  SocketChannel connectedClient = serverSocketChannel.accept();
-                  connectedClient.configureBlocking(false);
-                  connectedClient.register(selector, SelectionKey.OP_READ);
-                  System.out.println("Nuovo client connesso a " + connectedClient.getRemoteAddress().toString());
+                  SocketChannel clientChannel = serverSocketChannel.accept();
+                  clientChannel.configureBlocking(false);
+                  clientChannel.register(selector, SelectionKey.OP_READ);
+                  System.out.println("Nuovo client connesso a " + clientChannel.getRemoteAddress().toString());
+                  ServerUtils.sendString(clientChannel, Settings.serverSettings.multicastAddress + ":" + Settings.serverSettings.multicastPort);
                } else if (key.isReadable()) {
                   System.out.println("La chiave è di tipo READ");
-                  SocketChannel client = (SocketChannel) key.channel();
-                  ServerRequestHandler request = new ServerRequestHandler(client,selector, registerQueue);
+                  SocketChannel clientChannel = (SocketChannel) key.channel();
+                  ServerRequestHandler request = new ServerRequestHandler(clientChannel,selector, registerQueue);
                   key.cancel();
                   updateKeySet(selector);
                   threadPool.submit(new Thread(request));
