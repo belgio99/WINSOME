@@ -1,10 +1,8 @@
-package Server;
+package Server.RMI;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
-
-import Server.utils.CallbackService;
 
 
 public interface ServerRemoteInterface extends Remote {

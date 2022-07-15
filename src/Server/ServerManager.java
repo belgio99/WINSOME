@@ -17,9 +17,9 @@ import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import Server.RMI.CallbackService;
 //import Server.RMI.FollowService.CallbackService;
 import Server.utils.Comment;
-import Server.utils.CallbackService;
 import Server.utils.Post;
 import Server.utils.User;
 

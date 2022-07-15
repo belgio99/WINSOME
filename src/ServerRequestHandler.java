@@ -237,14 +237,16 @@ public class ServerRequestHandler implements Runnable {
 
    private String deletePost(User u, String[] requestSplitted) {
       requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || !intToStringChecker(requestSplitted[1], new BitSet(3) {
-         {
-            flip(1, 3);
-         }
-      }))
+      int postID;
+      if (requestSplitted.length < 2)
          return "L'input non è corretto!";
-
-      Post post = ServerManager.getPostByID(Integer.parseInt(requestSplitted[1]));
+      try {
+         postID = Integer.parseInt(requestSplitted[1]);
+      }
+      catch (IllegalArgumentException e) {
+         return "L'input non è corretto!";
+      }
+      Post post = ServerManager.getPostByID(postID);
       if (post == null)
          return "Post non trovato!";
       if (!post.getAuthor().equals(u.getUsername()))
@@ -254,11 +256,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String followUser(User u, String[] requestSplitted) {
       requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || !intToStringChecker(requestSplitted[1], new BitSet(3) {
-         {
-            flip(1, 3);
-         }
-      }))
+      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty())
          return "L'input non è corretto!";
 
       switch (ServerManager.followUser(u, requestSplitted[1])) {
@@ -530,7 +528,7 @@ public class ServerRequestHandler implements Runnable {
                   .append("<      wallet btc\n")
                   .append("<      help\n")
                   .append("<      exit\n");
-                  
+
       return msg.toString();
    }
 }

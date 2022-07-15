@@ -9,9 +9,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import Server.ServerRemoteInterface;
 import Server.Configs.Settings;
-import Server.utils.CallbackService;
+import Server.RMI.CallbackService;
+import Server.RMI.ServerRemoteInterface;
 import Server.utils.NotifyClient;
 
 public class ClientMain {

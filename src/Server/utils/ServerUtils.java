@@ -38,7 +38,7 @@ public class ServerUtils {
 
     // Questa funzione controlla se un int è positivo, negativo, o se deve essere
     // diverso da zero, in base al valore di flag
-    public static boolean intToStringChecker(String str, BitSet bs) {
+    /*public static boolean intToStringChecker(String str, BitSet bs) {
         int i;
         try {
             i = Integer.parseInt(str);
@@ -53,7 +53,7 @@ public class ServerUtils {
             return false;
         return true;
 
-    }
+    }*/
 
     public static String[] fixArray(String clientRequest) {
         String[] splitted = clientRequest.split("(?=\"[^\"].*\")");

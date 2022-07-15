@@ -1,11 +1,9 @@
-package Server.RMI.Registration;
+package Server.RMI;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 
-import Server.ServerRemoteInterface;
-import Server.utils.CallbackService;
 import Server.ServerManager;
 
 

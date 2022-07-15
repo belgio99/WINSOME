@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 
 import Server.ServerManager;
 import Server.Configs.Settings;
-import Server.RMI.Registration.RemoteService;
+import Server.RMI.RemoteService;
 import Server.utils.ServerUtils;
 
 public class ServerMain {
