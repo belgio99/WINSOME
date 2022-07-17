@@ -23,12 +23,15 @@ public class Database {
    private ConcurrentHashMap<Integer, Post> postDB; // postID -> post
    private ConcurrentHashMap<String, LinkedList<String>> globalTagsList;
    private final Gson gson;
+   private static RewardCalculator r1;
 
    public Database() {
       postDB = new ConcurrentHashMap<>();
       globalTagsList = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
       gson = new GsonBuilder().setPrettyPrinting().create();
+      r1 = new RewardCalculator(postDB);
+      r1.startAnalyzing();
 
    }
 
@@ -165,14 +168,8 @@ public class Database {
       return globalTagsList.get(tag);
    }
 
-   /*
-    * public static boolean addUserLogged(User user, SocketChannel client) {
-    * return usersLogged.putIfAbsent(client, user) == null ? true : false;
-    * }
-    * public static boolean logoutUser(User user, SocketChannel client) {
-    * return usersLogged.remove(client, user);
-    * }
-    * public User getUserLogged(SocketChannel clientChannel) {
-    * return usersLogged.get(clientChannel);
-    */
+   public void shutdownDatabase() {
+      r1.shutdown();
+      saveDatabaseToFile();
+   }
 }

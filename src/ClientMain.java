@@ -63,12 +63,12 @@ public class ClientMain {
                 if (input.trim().isEmpty())
                     continue;
                 input = input.trim();
-                String[] splitted = input.split(" ");
-                splitted[0] = splitted[0].toLowerCase();
-                if (splitted[0].equals("help"))
+                String[] split = input.split(" ");
+                split[0] = split[0].toLowerCase();
+                if (split[0].equals("help"))
                     send(input);
                 if (!isUserLoggedIn) {
-                    switch (splitted[0]) {
+                    switch (split[0]) {
                         case "register":
                             register(input);
                             break;
@@ -78,8 +78,8 @@ public class ClientMain {
                                 isUserLoggedIn = true;
                                 System.out.println("< Operazione completata");
                                 followersList.clear();
-                                followersList.addAll(remote.receiveFollowersList(splitted[1]));
-                                username = splitted[1];
+                                followersList.addAll(remote.receiveFollowersList(split[1]));
+                                username = split[1];
                                 remote.registerForCallback(username, stub);
                             } else {
                                 System.out.println("< Login fallito!"); // Ricevo la stringa con il messaggio di errore
@@ -91,7 +91,7 @@ public class ClientMain {
                             break;
                     }
                 } else {
-                    switch (splitted[0]) {
+                    switch (split[0]) {
                         case "logout":
                             logout();
                             break;
@@ -122,17 +122,17 @@ public class ClientMain {
     }
 
     private static void register(String input) throws Exception {
-        String splittedInput[] = input.split(" ");
-        String regUsername = splittedInput[1].trim().toLowerCase();
-        String password = splittedInput[2].trim();
+        String splitInput[] = input.split(" ");
+        String regUsername = splitInput[1].trim().toLowerCase();
+        String password = splitInput[2].trim();
         LinkedList<String> tagsList = new LinkedList<>();
         // Da mettere se la user e pass sono vuoti o è di lunghezza 0 o superiore a 20.
         if (regUsername.isEmpty() || password.isEmpty() || regUsername.length() > 20 || password.length() > 20) {
             System.out.println("< Username o password non validi! Lunghezza massima ammessa: 20 caratteri");
             return;
         }
-        for (int i = 3; i < splittedInput.length; i++) {
-            tagsList.add(splittedInput[i].trim().toLowerCase());
+        for (int i = 3; i < splitInput.length; i++) {
+            tagsList.add(splitInput[i].trim().toLowerCase());
         }
         int score = remote.registerUser(regUsername, password, tagsList);
         if (score == -1)

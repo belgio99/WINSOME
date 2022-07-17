@@ -27,7 +27,6 @@ public class ServerManager {
    //private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
    private static final Database database = new Database();
    private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>(); //mappa degli utenti registrati alle callbacks
-   private static final RewardCalculator r1;
 
    private static Selector selector;
    private static final ConcurrentHashMap<SocketChannel, User> usersLogged = new ConcurrentHashMap<>();
@@ -38,8 +37,6 @@ public class ServerManager {
       } catch (IOException e) {
          e.printStackTrace();
       }
-      r1 = new RewardCalculator();
-      r1.startAnalyzing();
    }
 
    public static void startupServer() {
@@ -47,11 +44,6 @@ public class ServerManager {
       return;
    }
 
-   public static void shutdownServer() {
-      r1.stopAnalyzing();
-      database.saveDatabaseToFile();
-      return;
-   }
 
    public static int register(String username, String password, LinkedList<String> tagsList) {
       if (!database.registerUser(username, password, tagsList))
@@ -104,7 +96,6 @@ public class ServerManager {
    public synchronized static Post createPost(String title, String content, User author) {
       Post post = new Post(database.getPreviousMaxPostID() + 1, author.getUsername(), title, content);
       database.addPost(author, post);
-      analyzeList.add(post);
       // database.saveDatabase();
       return post;
    }
@@ -112,7 +103,6 @@ public class ServerManager {
    public synchronized static int deletePost(Post post) {
       try {
          database.deletePost(post);
-         analyzeList.remove(post);
          return 0;
       } catch (Exception e) {
          return -1;
@@ -188,7 +178,6 @@ public class ServerManager {
          return -1;
       Comment comment = new Comment(u, content);
       post.getCommentsList().add(comment);
-      analyzeList.add(post);
       return 0;
    }
 
@@ -218,7 +207,6 @@ public class ServerManager {
          default:
             return -1;
       }
-      analyzeList.add(post);
       return 0;
    }
 
@@ -289,8 +277,7 @@ public class ServerManager {
    public static void shutdown() {
       for (SocketChannel cc : usersLogged.keySet())
          logout(cc);
-      r1.shutdown();
-      database.saveDatabaseToFile();
+      database.shutdownDatabase();
    }
 
    public static LinkedList<String> receiveFollowersList(String username) {

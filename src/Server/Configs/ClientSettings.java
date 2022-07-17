@@ -8,6 +8,7 @@ public class ClientSettings {
 
    public static String serverAddress;
    public static int TCPPort;
+   public static int socketTimeout;
 
    static {
       String path = "src/Server/Configs/clientConfig.txt";
@@ -19,6 +20,7 @@ public class ClientSettings {
             serverAddress = (String) settings.getOrDefault("SERVER", "localhost");
             TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPORT", 50000)));
             TCPPort = checkValidPort(TCPPort, 50000);
+            socketTimeout = Integer.parseInt(String.valueOf(settings.getOrDefault("SOCKETTIMEOUT", -1)));
 
             System.out.println("File di configurazione caricato");
          }
@@ -36,6 +38,7 @@ public class ClientSettings {
    public static void setDefaults() {
       serverAddress = "localhost";
       TCPPort = 50000;
+      socketTimeout = -1;
 
       return;
    }

@@ -12,9 +12,6 @@ import Server.Configs.ServerSettings;
 
 public class ServerUtils {
 
-    // Array di boolean per flag se int è positivo, negativo, o se deve essere
-    // diverso da zero
-
     public static void sendString(SocketChannel clientChannel, String msg) throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
         System.out.println(msg.getBytes().length);
@@ -33,34 +30,15 @@ public class ServerUtils {
 
     }
 
-    // Questa funzione controlla se un int è positivo, negativo, o se deve essere
-    // diverso da zero, in base al valore di flag
-    /*public static boolean intToStringChecker(String str, BitSet bs) {
-        int i;
-        try {
-            i = Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        if (bs.get(0) && i > 0) // controlla se è negativo
-            return false;
-        if (bs.get(1) && i == 0) // controlla se è diverso da zero
-            return false;
-        if (bs.get(2) && i < 0) // controlla se è positivo
-            return false;
-        return true;
-
-    }*/
-
     public static String[] fixArray(String clientRequest) {
-        String[] splitted = clientRequest.split("(?=\"[^\"].*\")");
-        if (splitted.length == 1)
-            splitted = clientRequest.split(" ");
-        for (int i = 0; i < splitted.length; i++) {
-            splitted[i] = splitted[i].replaceAll("\"", "");
-            splitted[i] = splitted[i].trim();
+        String[] split = clientRequest.split("(?=\"[^\"].*\")");
+        if (split.length == 1)
+            split = clientRequest.split(" ");
+        for (int i = 0; i < split.length; i++) {
+            split[i] = split[i].replaceAll("\"", "");
+            split[i] = split[i].trim();
         }
-        return splitted;
+        return split;
     }
 
     public synchronized static void sendUDPMessage(String message) {

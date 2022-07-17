@@ -55,7 +55,7 @@ public class ServerMain {
                   UnicastRemoteObject.unexportObject(regService, false);
                   r1.unbind(ServerSettings.RMIName);
                   Thread.sleep(200);
-                  ServerManager.shutdownServer();
+                  ServerManager.shutdown();
 
                } catch (Exception e) {
                   Thread.currentThread().interrupt();

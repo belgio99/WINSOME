@@ -1,9 +1,6 @@
 # Indirizzo del server
 SERVER=localhost
-#
 # Porta TCP del server
 TCPPORT=50000
-
-#
-# Timeout della socket
+# Timeout socket
 SOCKTIMEOUT=300000

@@ -48,25 +48,25 @@ public class ServerRequestHandler implements Runnable {
 
    public void run() {
       String response = "";
-      String[] requestSplitted;
+      String[] requestSplit;
       try {
          String clientRequest = receiveRequest();
-         requestSplitted = clientRequest.trim().split(" ");
-         if (requestSplitted.length < 1 || requestSplitted[0].trim().isEmpty()) {
+         requestSplit = clientRequest.trim().split(" ");
+         if (requestSplit.length < 1 || requestSplit[0].trim().isEmpty()) {
             response = "L'input non è corretto!";
             sendString(clientChannel, response);
             registerKey();
             return;
          }
-         requestSplitted[0] = requestSplitted[0].trim();
-         if (requestSplitted[0].equals("login")) {
-            if (requestSplitted.length != 3 || requestSplitted[1].trim().isEmpty()
-                  || requestSplitted[2].trim().isEmpty()) {
+         requestSplit[0] = requestSplit[0].trim();
+         if (requestSplit[0].equals("login")) {
+            if (requestSplit.length != 3 || requestSplit[1].trim().isEmpty()
+                  || requestSplit[2].trim().isEmpty()) {
                sendString(clientChannel, "L'input non è corretto!");
                registerKey();
                return;
             }
-            sendString(clientChannel, login(requestSplitted));
+            sendString(clientChannel, login(requestSplit));
             registerKey();
             return;
          }
@@ -81,17 +81,17 @@ public class ServerRequestHandler implements Runnable {
          // Fino a qua l'utente è loggato e la stringa 0 è checked, ma le stringhe dalla
          // 0 in poi sono unchecked
          // Controllo anche la stringa 1 perché serve per alcuni comandi
-         switch (requestSplitted[0]) {
+         switch (requestSplit[0]) {
             case "help":
                response = printHelp();
             case "logout":
                response = logout();
                break;
             case "list":
-               if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty()) {
+               if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty()) {
                   response = "L'input non è corretto!";
                } else
-                  switch (requestSplitted[1]) {
+                  switch (requestSplit[1]) {
                      case "user":
                         response = listUsers(u);
                      case "following":
@@ -102,15 +102,15 @@ public class ServerRequestHandler implements Runnable {
                   }
                break;
             case "show":
-               if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty()) {
+               if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty()) {
                   response = "L'input non è corretto!";
                } else
-                  switch (requestSplitted[1]) {
+                  switch (requestSplit[1]) {
                      case "feed":
                         response = showFeed(u);
                         break;
                      case "post":
-                        response = showPost(requestSplitted);
+                        response = showPost(requestSplit);
                         break;
                      default:
                         response = "Operazione non valida!";
@@ -121,32 +121,32 @@ public class ServerRequestHandler implements Runnable {
                response = createPost(u, clientRequest.replaceFirst("post ", ""));
                break;
             case "delete":
-               response = deletePost(u, requestSplitted);
+               response = deletePost(u, requestSplit);
                break;
             case "follow":
-               response = followUser(u, requestSplitted);
+               response = followUser(u, requestSplit);
                break;
             case "unfollow":
-               response = unfollowUser(u, requestSplitted);
+               response = unfollowUser(u, requestSplit);
                break;
             case "comment":
                response = commentPost(u, clientRequest.replaceFirst("comment ", ""));
                break;
             case "rewin":
-               response = rewinPost(u, requestSplitted);
+               response = rewinPost(u, requestSplit);
                break;
             case "rate":
-               response = ratePost(u, requestSplitted);
+               response = ratePost(u, requestSplit);
                break;
             case "blog":
                response = viewBlog(u);
                break;
             case "wallet":
-               if (requestSplitted.length == 1)
+               if (requestSplit.length == 1)
                   response = getWallet(u);
-               else if (requestSplitted[1].trim().isEmpty())
+               else if (requestSplit[1].trim().isEmpty())
                   response = "L'input non è corretto!";
-               else if (requestSplitted[1].equals("btc"))
+               else if (requestSplit[1].equals("btc"))
                   response = getWalletBTC(u);
                else
                   response = "L'input non è corretto!";
@@ -169,11 +169,11 @@ public class ServerRequestHandler implements Runnable {
       selector.wakeup();
    }
 
-   private String login(String[] splitted) {
-      if (splitted.length != 3 || splitted[1].trim().isEmpty() || splitted[2].trim().isEmpty())
+   private String login(String[] split) {
+      if (split.length != 3 || split[1].trim().isEmpty() || split[2].trim().isEmpty())
          return "L'input non è corretto!";
-      String username = splitted[1];
-      String password = splitted[2];
+      String username = split[1];
+      String password = split[2];
       User u = ServerManager.login(username, password, clientChannel);
       if (u == null) {
          StringBuilder msg = new StringBuilder();
@@ -195,24 +195,24 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String createPost(User u, String clientRequest) throws IOException {
-      String[] splitted = fixArray(clientRequest);
-      if (splitted.length != 3 || splitted[0].trim().isEmpty() || splitted[2].trim().isEmpty())
+      String[] split = fixArray(clientRequest);
+      if (split.length != 3 || split[0].trim().isEmpty() || split[2].trim().isEmpty())
          return "L'input non è corretto!";
-      String title = splitted[0];
-      String content = splitted[2];
+      String title = split[0];
+      String content = split[2];
       Post post = ServerManager.createPost(title, content, u);
       if (post == null)
          return "Operazione non valida!";
       return "Operazione completata: ID del post: " + post.getId();
    }
 
-   private String deletePost(User u, String[] requestSplitted) {
-      requestSplitted[1] = requestSplitted[1].trim();
+   private String deletePost(User u, String[] requestSplit) {
+      requestSplit[1] = requestSplit[1].trim();
       int postID;
-      if (requestSplitted.length < 2)
+      if (requestSplit.length < 2)
          return "L'input non è corretto!";
       try {
-         postID = Integer.parseInt(requestSplitted[1]);
+         postID = Integer.parseInt(requestSplit[1]);
       } catch (IllegalArgumentException e) {
          return "L'input non è corretto!";
       }
@@ -224,12 +224,12 @@ public class ServerRequestHandler implements Runnable {
       return ServerManager.deletePost(post) == 0 ? "Operazione completata" : "Operazione non permessa!";
    }
 
-   private String followUser(User u, String[] requestSplitted) {
-      requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty())
+   private String followUser(User u, String[] requestSplit) {
+      requestSplit[1] = requestSplit[1].trim();
+      if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty())
          return "L'input non è corretto!";
 
-      switch (ServerManager.followUser(u, requestSplitted[1])) {
+      switch (ServerManager.followUser(u, requestSplit[1])) {
          case 0:
             return "Operazione completata";
          case -1:
@@ -239,12 +239,12 @@ public class ServerRequestHandler implements Runnable {
       }
    }
 
-   private String unfollowUser(User u, String[] requestSplitted) {
-      requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty())
+   private String unfollowUser(User u, String[] requestSplit) {
+      requestSplit[1] = requestSplit[1].trim();
+      if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty())
          return "L'input non è corretto!";
 
-      switch (ServerManager.unfollowUser(u, requestSplitted[1])) {
+      switch (ServerManager.unfollowUser(u, requestSplit[1])) {
          case 0:
             return "Operazione completata";
          case -1:
@@ -293,9 +293,9 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String commentPost(User u, String clientRequest) {
-      String[] splitted = fixArray(clientRequest);
-      String comment = splitted[1];
-      int idPost = Integer.parseInt(splitted[0]);
+      String[] split = fixArray(clientRequest);
+      String comment = split[1];
+      int idPost = Integer.parseInt(split[0]);
       switch (ServerManager.addComment(u, ServerManager.getPostByID(idPost), comment)) {
          case 0:
             return "Operazione completata";
@@ -306,13 +306,13 @@ public class ServerRequestHandler implements Runnable {
       }
    }
 
-   private String rewinPost(User u, String[] requestSplitted) {
+   private String rewinPost(User u, String[] requestSplit) {
       int postID;
-      requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty())
+      requestSplit[1] = requestSplit[1].trim();
+      if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty())
          return "L'input non è corretto!";
       try {
-         postID = Integer.parseInt(requestSplitted[1]);
+         postID = Integer.parseInt(requestSplit[1]);
       } catch (NumberFormatException e) {
          return "L'input non è corretto!";
       }
@@ -443,10 +443,10 @@ public class ServerRequestHandler implements Runnable {
       return msg.toString();
    }
 
-   private String showPost(String[] requestSplitted) throws IOException {
-      if (requestSplitted.length < 3)
+   private String showPost(String[] requestSplit) throws IOException {
+      if (requestSplit.length < 3)
          return "L'input non è corretto";
-      int idPost = Integer.parseInt(requestSplitted[2]);
+      int idPost = Integer.parseInt(requestSplit[2]);
       Post post = ServerManager.getPostByID(idPost);
       if (post == null) {
          return "Post non trovato!";

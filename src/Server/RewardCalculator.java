@@ -1,7 +1,6 @@
 package Server;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +13,7 @@ public class RewardCalculator extends ScheduledThreadPoolExecutor {
    private int n;
    private TimeUnit unit;
 
-   public RewardCalculator(ConcurrentLinkedQueue<Post> postDB) {
+   public RewardCalculator(ConcurrentHashMap<Integer, Post> postDB) {
       super(1);
       this.postDB = postDB;
       setValues();
