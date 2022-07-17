@@ -53,7 +53,7 @@ public class ServerManager {
    }
 
    public static int register(String username, String password, LinkedList<String> tagsList) {
-      if (!database.registerUser(username, password, tagsList))
+      if (!database.registerUser(username, password, tagsList)) //TODO: controllare perché non funziona il punteggio delle password
          return -1;
       int score = 0;
       // se la password è lunga più di 8 caratteri, aumenta il punteggio di 1
@@ -92,8 +92,11 @@ public class ServerManager {
    }
 
    public static int logout(SocketChannel clientChannel) {
-      // database.logoutUser(u);
-      return removeUserLogged(clientChannel);
+      try {
+         return usersLogged.remove(clientChannel) == null ? -1 : 0;
+      } catch (NullPointerException e) {
+         return -1;
+      }
 
    }
 
@@ -126,14 +129,6 @@ public class ServerManager {
 
    public static Selector getSelector() {
       return selector;
-   }
-
-   public static int removeUserLogged(SocketChannel clientChannel) {
-      try {
-         return usersLogged.remove(clientChannel) == null ? -1 : 0;
-      } catch (NullPointerException e) {
-         return -1;
-      }
    }
 
    public static User getUserLogged(SocketChannel clientChannel) {
@@ -198,11 +193,11 @@ public class ServerManager {
 
    public static int ratePost(User u, Post post, int vote) {
       if (post.getAuthor().equals(u.getUsername()))
-         return -2;
+         return -2; // non puoi votare il tuo post
       if (post.getLikersList().containsKey(u) || post.getDislikersList().containsKey(u))
-         return -3;
-      if (!database.getUserPosts(u).contains(post))
-         return -4;
+         return -3; // non puoi votare un post già votato
+      if (!post.getRewinList().contains(u))
+         return -4; // non puoi votare un post di cui non hai effettuato il rewin
       switch (vote) {
          case 1:
             post.getLikersList().put(u, Instant.now());

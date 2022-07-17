@@ -22,8 +22,6 @@ import Server.utils.ServerUtils;
 
 public class ServerMain {
 
-   // private static ByteBuffer buffer;
-   // private static final int port = 10000;
    public static ServerSocketChannel serverSocketChannel;
 
    public static void main(String[] args) {
@@ -44,13 +42,13 @@ public class ServerMain {
          // buffer = ByteBuffer.allocate(1024);
          String multicastAddress = Settings.serverSettings.multicastAddress + ":"
                + Settings.serverSettings.multicastPort;
-         ByteBuffer multicastBuffer = ByteBuffer.wrap(multicastAddress.getBytes());
+         ByteBuffer multicastBuffer = ByteBuffer.wrap(multicastAddress.getBytes()); //TO DO: controllare se va bene questo buffer (da rimuovere)
 
          RemoteService regService = new RemoteService();
          Registry r1 = LocateRegistry.createRegistry(Settings.serverSettings.RMIPort);
          r1.bind(Settings.serverSettings.RMIName, regService);
 
-         // Mettere il follow service
+         // Mettere il follow service //TODO
 
          Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -89,7 +87,6 @@ public class ServerMain {
             System.out.println("Ricevuta nuova chiave!");
             Set<SelectionKey> selectedKS = selector.selectedKeys();
             for (SelectionKey key : selectedKS) {
-               // System.out.println("La chiave è di tipo" + key.toString());
                if (key.isAcceptable()) {
                   System.out.println("La chiave è di tipo ACCEPT");
                   SocketChannel clientChannel = serverSocketChannel.accept();
@@ -97,11 +94,7 @@ public class ServerMain {
                   clientChannel.register(selector, SelectionKey.OP_READ);
                   System.out.println("Nuovo client connesso a " + clientChannel.getRemoteAddress().toString());
                   ServerUtils.sendString(clientChannel,
-                        Settings.serverSettings.multicastAddress + ":" + Settings.serverSettings.multicastPort); // invio
-                                                                                                                 // indirizzo
-                                                                                                                 // multicast
-                                                                                                                 // al
-                                                                                                                 // client
+                        Settings.serverSettings.multicastAddress + ":" + Settings.serverSettings.multicastPort);
                } else if (key.isReadable()) {
                   System.out.println("La chiave è di tipo READ");
                   SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -109,18 +102,7 @@ public class ServerMain {
                   key.cancel();
                   updateKeySet(selector);
                   threadPool.submit(new Thread(request));
-                  // int command = readCommand(client, buffer);
-               } /*
-                  * else if (key.isWritable()) {
-                  * SocketChannel client = (SocketChannel) key.channel();
-                  * Message response = (Message) key.attachment();
-                  * ServerRequestResponder writer = new ServerRequestResponder(client, response);
-                  * key.cancel();
-                  * updateKeySet(selector);
-                  * threadPool.submit(new Thread(writer));
-                  * // Invio la risposta
-                  * }
-                  */
+               }
 
                selectedKS.remove(key);
             }

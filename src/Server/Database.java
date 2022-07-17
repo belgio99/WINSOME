@@ -24,7 +24,7 @@ public class Database {
    private ConcurrentHashMap<String, User> userDB; // username -> user
    private ConcurrentHashMap<Integer,Post> postDB; // postID -> post
    private ConcurrentHashMap<String, LinkedList<String>> globalTagsList;
-   private final ConcurrentLinkedQueue<Post> analyzeList;
+   private final ConcurrentLinkedQueue<Post> analyzeList; //TODO
 /*    private final ConcurrentHashMap<String, LinkedList<Post>> trash;
    private final ConcurrentHashMap<String, LinkedList<String>> tags; */
    private final Gson gson;

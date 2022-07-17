@@ -1,12 +1,10 @@
-package Server.utils;
+package Server.RMI;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import Server.RMI.CallbackService;
 
 public class NotifyClient extends RemoteObject implements CallbackService {
    private LinkedList<String> followers;

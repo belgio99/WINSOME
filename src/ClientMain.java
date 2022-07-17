@@ -11,8 +11,8 @@ import java.util.Scanner;
 
 import Server.Configs.Settings;
 import Server.RMI.CallbackService;
+import Server.RMI.NotifyClient;
 import Server.RMI.ServerRemoteInterface;
-import Server.utils.NotifyClient;
 
 public class ClientMain {
     public static final String serverName = "localhost";

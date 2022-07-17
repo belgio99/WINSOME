@@ -7,7 +7,6 @@ import java.nio.channels.SocketChannel;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -61,7 +60,6 @@ public class ServerRequestHandler implements Runnable {
             return;
          }
          requestSplitted[0] = requestSplitted[0].trim();
-         // fino a qua il comando deve essere buono
          if (requestSplitted[0].equals("login")) {
             if (requestSplitted.length != 3 || requestSplitted[1].trim().isEmpty()
                   || requestSplitted[2].trim().isEmpty()) {
@@ -143,6 +141,7 @@ public class ServerRequestHandler implements Runnable {
                break;
             case "blog":
                response = viewBlog(u);
+               break;
             case "wallet":
                if (requestSplitted.length == 1)
                   response = getWallet(u);
@@ -164,7 +163,7 @@ public class ServerRequestHandler implements Runnable {
          ServerManager.logout(clientChannel);
       }
 
-      // sendResult(result);
+
 
    }
 
@@ -173,30 +172,7 @@ public class ServerRequestHandler implements Runnable {
          selector.wakeup();
    }
 
-   /*
-    * private void registerKey(SocketChannel clientChannel, Object object) {
-    * try {
-    * clientChannel.register(selector, SelectionKey.OP_READ, object);
-    * selector.wakeup();
-    * }
-    * catch (ClosedChannelException e) {
-    * ServerManager.logoutUser(clientChannel);
-    * }
-    * 
-    * }
-    */
-   /*
-    * private void sendResult(int result) {
-    * try {
-    * clientChannel.register(selector, SelectionKey.OP_WRITE, result);
-    * selector.wakeup();
-    * }
-    * catch (Exception e)
-    * {
-    * e.printStackTrace();
-    * }
-    * }
-    */
+
    private String login(String[] splitted) {
       if (splitted.length != 3 || splitted[1].trim().isEmpty() || splitted[2].trim().isEmpty())
          return "L'input non è corretto!";
@@ -271,11 +247,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String unfollowUser(User u, String[] requestSplitted) {
       requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || !intToStringChecker(requestSplitted[1], new BitSet(3) {
-         {
-            flip(1, 3);
-         }
-      }))
+      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty()) //TODO
          return "L'input non è corretto!";
 
       switch (ServerManager.unfollowUser(u, requestSplitted[1])) {
@@ -340,11 +312,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String rewinPost(User u, String[] requestSplitted) {
       requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || !intToStringChecker(requestSplitted[1], new BitSet(3) {
-         {
-            flip(1, 3);
-         }
-      }))
+      if (requestSplitted.length < 2   || requestSplitted[1].trim().isEmpty()) //TODO //flippo i byte 1 e 2 (funziona da 1 a n-1), ovvero controllo se il numero è positivo o !=0
          return "L'input non è corretto!";
       Post post = ServerManager.getPostByID(Integer.parseInt(requestSplitted[1]));
       if (post == null)
@@ -362,11 +330,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String ratePost(User u, String[] requestSplit) {
       int idPost, vote;
-      if (requestSplit.length < 3 || !intToStringChecker(requestSplit[1], new BitSet(3) {
-         {
-            flip(1, 3); //flippo i byte 1 e 2 (funziona da 1 a n-1), ovvero controllo se il numero è positivo o !=0
-         }
-      }))
+      if (requestSplit.length < 3) //TODO
          return "L'input non è corretto!";
       try {
       idPost = Integer.parseInt(requestSplit[1]);
@@ -472,11 +436,7 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String showPost(String[] requestSplitted) throws IOException {
-      if (requestSplitted.length < 3 || !intToStringChecker(requestSplitted[2], new BitSet(3) {
-         {
-            flip(1, 3);
-         }
-      }))
+      if (requestSplitted.length < 3) //TODO
          return "L'input non è corretto";
       int idPost = Integer.parseInt(requestSplitted[2]);
       Post post = ServerManager.getPostByID(idPost);

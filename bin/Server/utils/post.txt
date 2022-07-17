@@ -1,0 +1,12 @@
+La classe Post è composta da una serie di attributi e metodi.
+In particolare, sono presenti:
+- un attributo contenente il titolo del post;
+- un attributo contenente il testo del post;
+- un attributo contenente l'username dell'autore del post;
+- un attributo contenente la lista dei commenti del post;
+- un attributo contenente la lista degli username degli utenti che hanno messo like al post;
+- un attributo contenente la lista degli username degli utenti che hanno messo dislike al post;
+- un attributo contenente la data di pubblicazione del post;
+- un attributo contenente la data dell'ultima analisi del post per il calcolo delle ricompense;
+- un attributo contenente la lista degli username degli utenti che hanno eseguito il rewin del post;
+- un attributo contenente quante iterazioni sono state eseguite per il calcolo delle ricompense;
