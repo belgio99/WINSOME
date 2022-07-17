@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Server.RMI.CallbackService;
-//import Server.RMI.FollowService.CallbackService;
 import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.User;
@@ -53,7 +52,8 @@ public class ServerManager {
    }
 
    public static int register(String username, String password, LinkedList<String> tagsList) {
-      if (!database.registerUser(username, password, tagsList)) //TODO: controllare perché non funziona il punteggio delle password
+      if (!database.registerUser(username, password, tagsList)) // TODO: controllare perché non funziona il punteggio
+                                                                // delle password
          return -1;
       int score = 0;
       // se la password è lunga più di 8 caratteri, aumenta il punteggio di 1
@@ -100,7 +100,7 @@ public class ServerManager {
 
    }
 
-   public static Post createPost(String title, String content, User author) {
+   public synchronized static Post createPost(String title, String content, User author) {
       Post post = new Post(database.getPreviousMaxPostID() + 1, author.getUsername(), title, content);
       database.addPost(author, post);
       analyzeList.add(post);
@@ -108,7 +108,7 @@ public class ServerManager {
       return post;
    }
 
-   public static int deletePost(Post post) {
+   public synchronized static int deletePost(Post post) {
       try {
          database.deletePost(post);
          analyzeList.remove(post);
@@ -120,10 +120,14 @@ public class ServerManager {
    }
 
    public static Post getPostByID(int ID) {
+      if (ID < 0)
+         return null;
       return database.getPostByID(ID);
    }
 
    public static User findUserByUsername(String username) {
+      if (username == null)
+         return null;
       return database.findUserByUsername(username);
    }
 
@@ -132,10 +136,12 @@ public class ServerManager {
    }
 
    public static User getUserLogged(SocketChannel clientChannel) {
+      if (clientChannel == null)
+         return null;
       return usersLogged.get(clientChannel);
    }
 
-   public static int followUser(User u, String usernameToFollow) {
+   public synchronized static int followUser(User u, String usernameToFollow) {
       User userToFollow = database.findUserByUsername(usernameToFollow);
       if (userToFollow == null)
          return -1;
@@ -152,7 +158,7 @@ public class ServerManager {
       return 0;
    }
 
-   public static int unfollowUser(User u, String usernameToUnfollow) {
+   public synchronized static int unfollowUser(User u, String usernameToUnfollow) {
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
       if (userToUnfollow == null)
          return -1;
@@ -171,6 +177,8 @@ public class ServerManager {
    }
 
    public static LinkedList<Post> viewBlog(User u) {
+      if (u == null)
+         return null;
       return database.getUserPosts(u);
    }
 
@@ -187,7 +195,7 @@ public class ServerManager {
       if (post == null)
          return -1;
       database.addPost(u, post);
-      post.getRewinList().add(u);
+      post.getRewinList().add(u.getUsername());
       return 0;
    }
 
@@ -196,7 +204,7 @@ public class ServerManager {
          return -2; // non puoi votare il tuo post
       if (post.getLikersList().containsKey(u) || post.getDislikersList().containsKey(u))
          return -3; // non puoi votare un post già votato
-      if (!post.getRewinList().contains(u))
+      if (!post.getRewinList().contains(u.getUsername()))
          return -4; // non puoi votare un post di cui non hai effettuato il rewin
       switch (vote) {
          case 1:
@@ -214,6 +222,8 @@ public class ServerManager {
    }
 
    public static double getWalletAmount(User u) {
+      if (u == null)
+         return -1;
       return u.getCurrentCompensation();
 
    }
@@ -254,7 +264,6 @@ public class ServerManager {
          while (itr2.hasNext())
             returnSet.add(itr2.next());
       }
-
       return returnSet;
 
    }

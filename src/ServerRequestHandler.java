@@ -1,5 +1,4 @@
 
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
@@ -12,7 +11,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Server.ServerManager;
-import Server.Configs.Settings;
 import Server.utils.Comment;
 import Server.utils.Post;
 import Server.utils.Transaction;
@@ -25,10 +23,12 @@ public class ServerRequestHandler implements Runnable {
    private final ByteBuffer buffer;
    private final Selector selector;
    private final ConcurrentLinkedQueue<SocketChannel> registerQueue;
+   static int columnSize = 20;
 
    // private final Selector selector = ServerManager.getSelector();
 
-   public ServerRequestHandler(SocketChannel clientChannel, Selector selector, ConcurrentLinkedQueue<SocketChannel> registerQueue) {
+   public ServerRequestHandler(SocketChannel clientChannel, Selector selector,
+         ConcurrentLinkedQueue<SocketChannel> registerQueue) {
       this.clientChannel = clientChannel;
       this.selector = selector;
       buffer = ByteBuffer.allocate(1024);
@@ -156,22 +156,19 @@ public class ServerRequestHandler implements Runnable {
                response = "L'input non è corretto!";
                break;
          }
-         sendString(clientChannel,response);
+         sendString(clientChannel, response);
          registerKey();
       } catch (IOException e) {
          System.out.println("Un client si è disconnesso!");
          ServerManager.logout(clientChannel);
       }
 
-
-
    }
 
    private void registerKey() {
-         registerQueue.add(clientChannel);
-         selector.wakeup();
+      registerQueue.add(clientChannel);
+      selector.wakeup();
    }
-
 
    private String login(String[] splitted) {
       if (splitted.length != 3 || splitted[1].trim().isEmpty() || splitted[2].trim().isEmpty())
@@ -182,18 +179,17 @@ public class ServerRequestHandler implements Runnable {
       if (u == null) {
          StringBuilder msg = new StringBuilder();
          msg.append("Errore in fase di login! Le cause possono essere:\n")
-            .append("< - Account non registrato\n")
-            .append("< - Password non corretta\n")
-            .append("< - Si sta provando ad accedere ad un altro account senza prima essersi sloggati\n")
-            .append("< - Si sta tentando di accedere, ma si è già loggati");
+               .append("< - Account non registrato\n")
+               .append("< - Password non corretta\n")
+               .append("< - Si sta provando ad accedere ad un altro account senza prima essersi sloggati\n")
+               .append("< - Si sta tentando di accedere, ma si è già loggati");
          return msg.toString();
-      }
-      else
+      } else
          return "Operazione completata";
    }
 
    private String logout() {
-      if (ServerManager.logout(clientChannel)==-1)
+      if (ServerManager.logout(clientChannel) == -1)
          return "Utente non loggato";
       else
          return "Operazione completata";
@@ -218,8 +214,7 @@ public class ServerRequestHandler implements Runnable {
          return "L'input non è corretto!";
       try {
          postID = Integer.parseInt(requestSplitted[1]);
-      }
-      catch (IllegalArgumentException e) {
+      } catch (IllegalArgumentException e) {
          return "L'input non è corretto!";
       }
       Post post = ServerManager.getPostByID(postID);
@@ -247,7 +242,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String unfollowUser(User u, String[] requestSplitted) {
       requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty()) //TODO
+      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty())
          return "L'input non è corretto!";
 
       switch (ServerManager.unfollowUser(u, requestSplitted[1])) {
@@ -266,7 +261,6 @@ public class ServerRequestHandler implements Runnable {
       int numPostsToShow = 10;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.viewBlog(u).iterator();
-      int columnSize = Settings.serverSettings.columnSize;
       msg.append("< ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");
@@ -274,8 +268,8 @@ public class ServerRequestHandler implements Runnable {
       for (int i = 0; i < columnSize - 6; i++)
          msg.append(" ");
       msg.append("Titolo")
-         .append("\n")
-         .append("< ");
+            .append("\n")
+            .append("< ");
       for (int i = 0; i < columnSize * 3; i++)
          msg.append("-");
       msg.append("\n");
@@ -283,16 +277,19 @@ public class ServerRequestHandler implements Runnable {
          Post currentPost = itr.next();
          String idAsString = String.valueOf(currentPost.getId());
          msg.append("< ")
-            .append(idAsString.substring(0,Math.min(idAsString.length(), columnSize - 1))); //con math.min evito l'eccezione in caso la stringa sia già più corta, e non ha bisogno di trimming
-         for (int j=0; j<columnSize-idAsString.length(); j++)
+               .append(idAsString.substring(0, Math.min(idAsString.length(), columnSize - 1))); // con math.min evito
+                                                                                                // l'eccezione in caso
+                                                                                                // la stringa sia già
+                                                                                                // più corta, e non ha
+                                                                                                // bisogno di trimming
+         for (int j = 0; j < columnSize - idAsString.length(); j++)
             msg.append(" ");
          msg.append("|" + currentPost.getAuthor().toString());
-         for (int j=0; j<columnSize-currentPost.getAuthor().length(); j++)
+         for (int j = 0; j < columnSize - currentPost.getAuthor().length(); j++)
             msg.append(" ");
          msg.append("|" + currentPost.getTitle().toString());
       }
       return msg.toString();
-
 
    }
 
@@ -311,10 +308,16 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String rewinPost(User u, String[] requestSplitted) {
+      int postID;
       requestSplitted[1] = requestSplitted[1].trim();
-      if (requestSplitted.length < 2   || requestSplitted[1].trim().isEmpty()) //TODO //flippo i byte 1 e 2 (funziona da 1 a n-1), ovvero controllo se il numero è positivo o !=0
+      if (requestSplitted.length < 2 || requestSplitted[1].trim().isEmpty())
          return "L'input non è corretto!";
-      Post post = ServerManager.getPostByID(Integer.parseInt(requestSplitted[1]));
+      try {
+         postID = Integer.parseInt(requestSplitted[1]);
+      } catch (NumberFormatException e) {
+         return "L'input non è corretto!";
+      }
+      Post post = ServerManager.getPostByID(postID);
       if (post == null)
          return "Post non trovato!";
       switch (ServerManager.rewinPost(u, post)) {
@@ -330,15 +333,16 @@ public class ServerRequestHandler implements Runnable {
 
    private String ratePost(User u, String[] requestSplit) {
       int idPost, vote;
-      if (requestSplit.length < 3) //TODO
+      if (requestSplit.length < 3)
          return "L'input non è corretto!";
       try {
-      idPost = Integer.parseInt(requestSplit[1]);
-      vote = Integer.parseInt(requestSplit[2]);
-      }
-      catch (NumberFormatException e) {
+         idPost = Integer.parseInt(requestSplit[1]);
+         vote = Integer.parseInt(requestSplit[2]);
+      } catch (NumberFormatException e) {
          return "L'input non è corretto!";
       }
+      if (vote < -1 || vote > 1)
+         return "Il voto non è valido!";
       Post post = ServerManager.getPostByID(idPost);
       if (post == null)
          return "Post non trovato!";
@@ -392,6 +396,7 @@ public class ServerRequestHandler implements Runnable {
       }
       return msg.toString();
    }
+
    private String listFollowing(User u) throws IOException {
       StringBuilder msg = new StringBuilder();
       HashSet<String> users = ServerManager.listFollowing(u);
@@ -403,11 +408,11 @@ public class ServerRequestHandler implements Runnable {
       }
       return msg.toString();
    }
+
    private String showFeed(User u) throws IOException {
       int numPostsToShow = 10;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.showFeed(u).iterator();
-      int columnSize = Settings.serverSettings.columnSize;
       msg.append("< ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");
@@ -415,8 +420,8 @@ public class ServerRequestHandler implements Runnable {
       for (int i = 0; i < columnSize - 6; i++)
          msg.append(" ");
       msg.append("Titolo")
-         .append("\n")
-         .append("< ");
+            .append("\n")
+            .append("< ");
       for (int i = 0; i < columnSize * 3; i++)
          msg.append("-");
       msg.append("\n");
@@ -424,11 +429,15 @@ public class ServerRequestHandler implements Runnable {
          Post currentPost = itr.next();
          String idAsString = String.valueOf(currentPost.getId());
          msg.append("< ")
-            .append(idAsString.substring(0,Math.min(idAsString.length(), columnSize - 1))); //con math.min evito l'eccezione in caso la stringa sia già più corta, e non ha bisogno di trimming
-         for (int j=0; j<columnSize-idAsString.length(); j++)
+               .append(idAsString.substring(0, Math.min(idAsString.length(), columnSize - 1))); // con math.min evito
+                                                                                                // l'eccezione in caso
+                                                                                                // la stringa sia già
+                                                                                                // più corta, e non ha
+                                                                                                // bisogno di trimming
+         for (int j = 0; j < columnSize - idAsString.length(); j++)
             msg.append(" ");
          msg.append("|" + currentPost.getAuthor().toString());
-         for (int j=0; j<columnSize-currentPost.getAuthor().length(); j++)
+         for (int j = 0; j < columnSize - currentPost.getAuthor().length(); j++)
             msg.append(" ");
          msg.append("|" + currentPost.getTitle().toString());
       }
@@ -436,7 +445,7 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String showPost(String[] requestSplitted) throws IOException {
-      if (requestSplitted.length < 3) //TODO
+      if (requestSplitted.length < 3)
          return "L'input non è corretto";
       int idPost = Integer.parseInt(requestSplitted[2]);
       Post post = ServerManager.getPostByID(idPost);
@@ -445,49 +454,52 @@ public class ServerRequestHandler implements Runnable {
       }
       StringBuilder msg = new StringBuilder();
       msg.append("Titolo: " + post.getTitle())
-         .append("\n")
-         .append("< ")
-         .append("Autore: " + post.getAuthor())
-         .append("\n")
-         .append("< ")
-         .append("Contenuto: " + post.getContent())
-         .append("\n")
-         .append("< ")
-         .append("Voti: " + post.getLikersList().size() + " positivi, " + post.getDislikersList().size() + " negativi")
-         .append("\n")
-         .append("< ")
-         .append("Commenti: " + post.getCommentsList().size())
-         .append("\n");
+            .append("\n")
+            .append("< ")
+            .append("Autore: " + post.getAuthor())
+            .append("\n")
+            .append("< ")
+            .append("Contenuto: " + post.getContent())
+            .append("\n")
+            .append("< ")
+            .append(
+                  "Voti: " + post.getLikersList().size() + " positivi, " + post.getDislikersList().size() + " negativi")
+            .append("\n")
+            .append("< ")
+            .append("Commenti: " + post.getCommentsList().size())
+            .append("\n");
       Iterator<Comment> itr = post.getCommentsList().iterator();
       while (itr.hasNext()) {
          Comment curr = itr.next();
-         msg.append("<      " + curr.getAuthor().getUsername().toString() + ": \"" + curr.getContent().toString() + "\" \n");
+         msg.append(
+               "<      " + curr.getAuthor().getUsername().toString() + ": \"" + curr.getContent().toString() + "\" \n");
       }
       return msg.toString();
    }
+
    private String printHelp() {
       StringBuilder msg = new StringBuilder();
-                msg.append("< Utilizzo:\n")
-                  .append("<      register <username> <password> <tags>\n")
-                  .append("<      login <username> <password>\n")
-                  .append("<      logout\n")
-                  .append("<      list user\n")
-                  .append("<      list followers\n")
-                  .append("<      list following\n")
-                  .append("<      follow <user>\n")
-                  .append("<      unfollow <user>\n")
-                  .append("<      blog\n")
-                  .append("<      post \"<title>\" \"<content>\"\n")
-                  .append("<      show feed\n")
-                  .append("<      show post <idPost>\n")
-                  .append("<      delete <idPost>\n")
-                  .append("<      rewin <idPost>\n")
-                  .append("<      rate <idPost> <vote>\n")
-                  .append("<      comment <idPost> \"<comment>\"\n")
-                  .append("<      wallet\n")
-                  .append("<      wallet btc\n")
-                  .append("<      help\n")
-                  .append("<      exit\n");
+      msg.append("< Utilizzo:\n")
+            .append("<      register <username> <password> <tags>\n")
+            .append("<      login <username> <password>\n")
+            .append("<      logout\n")
+            .append("<      list user\n")
+            .append("<      list followers\n")
+            .append("<      list following\n")
+            .append("<      follow <user>\n")
+            .append("<      unfollow <user>\n")
+            .append("<      blog\n")
+            .append("<      post \"<title>\" \"<content>\"\n")
+            .append("<      show feed\n")
+            .append("<      show post <idPost>\n")
+            .append("<      delete <idPost>\n")
+            .append("<      rewin <idPost>\n")
+            .append("<      rate <idPost> <vote>\n")
+            .append("<      comment <idPost> \"<comment>\"\n")
+            .append("<      wallet\n")
+            .append("<      wallet btc\n")
+            .append("<      help\n")
+            .append("<      exit\n");
 
       return msg.toString();
    }

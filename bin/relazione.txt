@@ -1,6 +1,0 @@
-Descrizione architettura
-L'architettura del nostro sistema è composta da una serie di strutture dati che permettono di gestire le informazioni relative ai diversi utenti.
-Questo progetto rappresenta un social network che permette di condividere informazioni con i propri followers.
-Pubblicando post o commenti, l'utente viene ricompensato con una valuta virtuale chiamata "wincoin", che funziona tramite una lista di transazioni (blockchain).
-L'utente, tramite un'interfaccia a linea di comando, interagisce con il server inserendo comandi.
-A seconda del comando inserito, viene utilizzata una connessione TCP o RMI.

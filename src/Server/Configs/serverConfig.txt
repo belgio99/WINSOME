@@ -1,17 +1,22 @@
 # Indirizzo IP del server
-IP_SERVER = "localhost"
-#
+SERVER = "localhost"
 # Porta del server
-PORT_SERVER = 8080
-#
-# Indirizzo IP del client
-IP_CLIENT = "localhost"
-#
-# Porta del client
-PORT_CLIENT = 8081
-#
-# Nome del registry
-HOST_REGISTRY = "localhost"
-#
-# Porta del registry
-PORT_REGISTRY = 8083
+TCPPORT = 50000
+# Indirizzo IP di multicast
+MCASTADDR = 239.255.32.32
+# Porta di multicast
+MCASTPORT = 50000
+# Indirizzo IP RMI
+RMIADDR = "localhost"
+# Porta RMI
+RMIPORT = 50001
+# Nome RMI
+RMINAME = "Winsome"
+# Percentuale destinata all'autore
+AUTHORPERCENT = 0.5
+# Tempo di timeout del socket
+SOCKTIMEOUT = -1
+# Cartella di storage dei file
+STORAGEPATH = "/tmp"
+# Intervallo di calcolo dei reward
+REWARDINTERVAL = 30s

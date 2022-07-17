@@ -5,15 +5,17 @@ import java.io.FileReader;
 import java.util.Properties;
 
 public class ClientSettings {
-   public String serverAddress;
-   public int TCPPort;
-   public int UDPPort;
 
-   public String RMIAddress;
-   public int RMIPort;
-   public String RMIName;
+   public static String serverAddress;
+   public static int TCPPort;
+   public static int UDPPort;
 
-   public ClientSettings(String path) {
+   public static String RMIAddress;
+   public static int RMIPort;
+   public static String RMIName;
+
+   static {
+      String path = "src/Server/Configs/clientConfig.txt";
       Properties settings = new Properties();
       File configFile = new File(path);
       try {
@@ -38,9 +40,10 @@ public class ClientSettings {
          e.printStackTrace();
          setDefaults();
       }
-      return;
-   }
-   public void setDefaults() {
+      }
+
+
+   public static void setDefaults() {
       serverAddress = "localhost";
       TCPPort = 50000;
 
@@ -50,7 +53,7 @@ public class ClientSettings {
       return;
    }
 
-   private int checkValidPort(int port, int defaultValue) {
+   private static int checkValidPort(int port, int defaultValue) {
       if (port < 0 || port > 65535) {
          System.out.println("Numero di porta non valida, verrà usato il valore di default");
          return defaultValue;

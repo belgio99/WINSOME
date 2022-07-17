@@ -8,56 +8,51 @@ import java.util.Properties;
 public class ServerSettings {
 
    public static String serverAddress;
-   public int TCPPort;
-   public int UDPPort;
+   public static int TCPPort;
 
-   public String multicastAddress;
-   public int multicastPort;
+   public static String multicastAddress;
+   public static int multicastPort;
 
-   public String RMIAddress;
-   public int RMIPort;
-   public String RMIName;
+   public static String RMIAddress;
+   public static int RMIPort;
+   public static String RMIName;
 
-   public int socketTimeout;
-   public String storagePath;
+   public static int socketTimeout;
+   public static String storagePath;
 
-   public int rewardDelayTime;
-   public float authorPercentage;
-   public int cacheSize;
+   public static String rewardDelayTime;
+   public static float authorPercentage;
 
-   public int columnSize;
    
-   
-   
-
-   public ServerSettings(String path) {
+   static {
+      String path = "src/Server/Configs/serverConfig.txt";
       Properties settings = new Properties();
       File configFile = new File(path);
+    //  File directory = new File("./");
+    //  System.out.println("Path intero: " + directory.getAbsolutePath());
       try {
          if (configFile.exists()) {
          settings.load(new FileReader(path));
-         serverAddress = (String)settings.getOrDefault("serverAddress", InetAddress.getLoopbackAddress().toString());
-         TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPort", 50000)));
+         serverAddress = (String)settings.getOrDefault("SERVER", InetAddress.getLoopbackAddress().toString());
+         TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPORT", 50000)));
          TCPPort = checkValidPort(TCPPort, 50000);
 
-         UDPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("UDPPort", 50001)));
-         UDPPort = checkValidPort(UDPPort, 50001);
+         multicastAddress = (String)settings.getOrDefault("MCASTADDR", "239.255.32.32");
+         multicastPort = Integer.parseInt(String.valueOf(settings.getOrDefault("MCASTPORT", 50001)));
+         multicastPort = checkValidPort(multicastPort, 50001);
 
-         multicastAddress = (String)settings.getOrDefault("multicastAddress", "239.255.32.32");
-         multicastPort = Integer.parseInt(String.valueOf(settings.getOrDefault("multicastPort", 50002)));
-         multicastPort = checkValidPort(multicastPort, 50002);
+         RMIAddress = (String)settings.getOrDefault("RMIADDR", InetAddress.getLoopbackAddress().toString());
+         RMIPort = Integer.parseInt(String.valueOf(settings.getOrDefault("RMIPORT", 50003)));
+         RMIPort = checkValidPort(RMIPort, 50002);
 
-         RMIAddress = (String)settings.getOrDefault("RMIAddress", InetAddress.getLoopbackAddress().toString());
-         RMIPort = Integer.parseInt(String.valueOf(settings.getOrDefault("RMIPort", 50003)));
-         RMIPort = checkValidPort(RMIPort, 50003);
+         RMIName = (String)settings.getOrDefault("RMINAME", "Winsome");
 
-         authorPercentage = Integer.parseInt(String.valueOf(settings.getOrDefault("authorPercentage", 50)));
-         socketTimeout = Integer.parseInt(String.valueOf(settings.getOrDefault("socketTimeout", -1)));
-         cacheSize = Integer.parseInt(String.valueOf(settings.getOrDefault("cacheSize", 10)));
-         storagePath = (String) settings.getOrDefault("databasePath", "/tmp");
-         rewardDelayTime = Integer.parseInt((String) settings.getOrDefault("rewardDelayTime", -1));
-         columnSize = Integer.parseInt((String) settings.getOrDefault("columnSize", 10));
-         }
+         authorPercentage = Integer.parseInt(String.valueOf(settings.getOrDefault("AUTHORPERCENT", 50)));
+         socketTimeout = Integer.parseInt(String.valueOf(settings.getOrDefault("SOCKETTIMEOUT", -1)));
+        
+         storagePath = (String) settings.getOrDefault("STORAGEPATH", "/tmp");
+         rewardDelayTime = (String) settings.getOrDefault("REWARDINTERVAL", -1);         
+      }
          else {
             System.out.println("File di configurazione non trovato, uso valori di default");
             setDefaults();
@@ -67,31 +62,31 @@ public class ServerSettings {
    {
       System.out.println("Errore nel file di configurazione");
       setDefaults();
-      return;
    }
-   return;
+   }
+   
+
+   public ServerSettings(String path) {
+      
 }
-   private void setDefaults() {
+   private static void setDefaults() {
       serverAddress = InetAddress.getLoopbackAddress().toString();
       TCPPort = 50000;
-      UDPPort = 50001;
       
-      multicastAddress = "239.12.0.32";
-      multicastPort = 50002;
+      multicastAddress = "239.255.32.32";
+      multicastPort = 50001;
 
       RMIAddress = InetAddress.getLoopbackAddress().toString();
-      RMIPort = 50003;
+      RMIPort = 50002;
       RMIName = "ServerRemoteInterface";
 
       authorPercentage = 50;
       socketTimeout = -1;
-      cacheSize = 10;
       storagePath = "/tmp";
-      rewardDelayTime = -1;
-      columnSize = 10;
+      rewardDelayTime = "30s";
    }
 
-   private int checkValidPort(int port, int defaultValue) {
+   private static int checkValidPort(int port, int defaultValue) {
       if (port < 0) {
          System.out.println("Numero di porta non valida, verrà usato il valore di default");
          return defaultValue;

@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import Server.Configs.ServerSettings;
 import Server.utils.Post;
 
 public class RewardCalculator extends ScheduledThreadPoolExecutor {
@@ -15,7 +16,7 @@ public class RewardCalculator extends ScheduledThreadPoolExecutor {
    public RewardCalculator(ConcurrentLinkedQueue<Post> analyzeList) {
       super(1);
       this.analyzeList = analyzeList;
-      //setValues();
+      setValues();
    }
 
    public void analyzePost(Post p) {
@@ -32,9 +33,9 @@ public class RewardCalculator extends ScheduledThreadPoolExecutor {
 
   //public void stopA
 
-   /*private void setValues() {
-        String delay = DefaultValues.serverval.rewardDelayTime;
-        char u = delay.charAt(delay.length() - 1);
+   private void setValues() {
+        String delay = ServerSettings.rewardDelayTime;
+        char u = delay.charAt(delay.length() - 1); // prendo l'ultimo carattere di REWARDINTERVAL
 
         String time = delay.substring(0, delay.indexOf(u));
         n = Integer.parseInt(time);
@@ -51,11 +52,11 @@ public class RewardCalculator extends ScheduledThreadPoolExecutor {
          case 'd': unit = TimeUnit.DAYS; break;
          default: {
              System.err.println("Errore: usare s,m,h,d,w (tutto minuscolo)");
-             System.err.println("Verrà usato il valore di defualt");
+             System.err.println("Verrà usato il valore di default");
              unit = TimeUnit.SECONDS;
              n = 5;
          }
       }
-   }*/
+   }
 
 }

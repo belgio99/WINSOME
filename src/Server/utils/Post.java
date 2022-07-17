@@ -15,7 +15,7 @@ public class Post {
    private LinkedHashMap<User, Instant> dislikersList;
    private Instant creationTimestamp;
    private Instant lastUpdateTimestamp;
-   private ConcurrentLinkedQueue<User> rewinList;
+   private ConcurrentLinkedQueue<String> rewinList;
    private int numIterations;
    
    
@@ -117,13 +117,10 @@ public class Post {
       this.lastUpdateTimestamp = lastUpdateTimestamp;
    }
 
-   public ConcurrentLinkedQueue<User> getRewinList() {
+   public ConcurrentLinkedQueue<String> getRewinList() {
       return this.rewinList;
    }
 
-   public void setRewinList(ConcurrentLinkedQueue<User> rewinList) {
-      this.rewinList = rewinList;
-   }
    public void setNumIterations(int numIterations) {
       this.numIterations = numIterations;
    }

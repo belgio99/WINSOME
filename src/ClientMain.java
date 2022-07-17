@@ -9,13 +9,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import Server.Configs.Settings;
+import Server.Configs.ClientSettings;
 import Server.RMI.CallbackService;
 import Server.RMI.NotifyClient;
 import Server.RMI.ServerRemoteInterface;
 
 public class ClientMain {
-    public static final String serverName = "localhost";
     private static ByteBuffer buffer;
     private static SocketChannel clientSocketChannel;
     public static ServerRemoteInterface remote;
@@ -23,17 +22,19 @@ public class ClientMain {
     private static LinkedList<String> followersList;
     private static CallbackService service;
     private static CallbackService stub;
+    //private static ClientSettings settings;
 
     public static void main(String[] args) throws Exception {
+        //settings = new ClientSettings("src/Server/Configs/clientConfig.txt");
         try {
             // Thread.sleep(2000);
             clientSocketChannel = SocketChannel.open(
-                    new InetSocketAddress(Settings.clientSettings.serverAddress, Settings.clientSettings.TCPPort));
+                    new InetSocketAddress(ClientSettings.serverAddress, ClientSettings.TCPPort));
             clientSocketChannel.configureBlocking(true);
             buffer = ByteBuffer.allocate(1024);
-            Registry r1 = LocateRegistry.getRegistry(Settings.clientSettings.RMIAddress,
-                    Settings.clientSettings.RMIPort);
-            remote = (ServerRemoteInterface) r1.lookup(Settings.clientSettings.RMIName);
+            Registry r1 = LocateRegistry.getRegistry(ClientSettings.RMIAddress,
+                    ClientSettings.RMIPort);
+            remote = (ServerRemoteInterface) r1.lookup(ClientSettings.RMIName);
             
         } catch (UnknownHostException e) {
             System.err.println("Non ho trovato l'host a cui connettermi!");

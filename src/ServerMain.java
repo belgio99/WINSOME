@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -16,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import Server.ServerManager;
+import Server.Configs.ServerSettings;
 import Server.Configs.Settings;
 import Server.RMI.RemoteService;
 import Server.utils.ServerUtils;
@@ -23,9 +23,10 @@ import Server.utils.ServerUtils;
 public class ServerMain {
 
    public static ServerSocketChannel serverSocketChannel;
+   public static ServerSettings settings;
 
    public static void main(String[] args) {
-
+      settings = new ServerSettings("src/Server/Configs/serverConfig.txt");
       System.out.println("Avvio server...");
       ExecutorService threadPool = Executors.newCachedThreadPool();
       Selector selector = ServerManager.getSelector();
@@ -35,20 +36,16 @@ public class ServerMain {
       try {
          serverSocketChannel = ServerSocketChannel.open();
          serverSocketChannel.configureBlocking(false);
-         serverSocketChannel.socket().bind(new InetSocketAddress(Settings.serverSettings.TCPPort));
+         serverSocketChannel.socket().bind(new InetSocketAddress(ServerSettings.TCPPort));
 
          serverSocketChannel.configureBlocking(false);
          serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
          // buffer = ByteBuffer.allocate(1024);
-         String multicastAddress = Settings.serverSettings.multicastAddress + ":"
-               + Settings.serverSettings.multicastPort;
-         ByteBuffer multicastBuffer = ByteBuffer.wrap(multicastAddress.getBytes()); //TO DO: controllare se va bene questo buffer (da rimuovere)
-
          RemoteService regService = new RemoteService();
-         Registry r1 = LocateRegistry.createRegistry(Settings.serverSettings.RMIPort);
-         r1.bind(Settings.serverSettings.RMIName, regService);
+         Registry r1 = LocateRegistry.createRegistry(ServerSettings.RMIPort);
+         r1.bind(ServerSettings.RMIName, regService);
 
-         // Mettere il follow service //TODO
+         //TODO Mettere il follow service
 
          Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -58,7 +55,7 @@ public class ServerMain {
                   selector.close();
                   serverSocketChannel.close();
                   UnicastRemoteObject.unexportObject(regService, false);
-                  r1.unbind(Settings.serverSettings.RMIName);
+                  r1.unbind(ServerSettings.RMIName);
                   Thread.sleep(200);
                   ServerManager.shutdownServer();
 
@@ -94,7 +91,8 @@ public class ServerMain {
                   clientChannel.register(selector, SelectionKey.OP_READ);
                   System.out.println("Nuovo client connesso a " + clientChannel.getRemoteAddress().toString());
                   ServerUtils.sendString(clientChannel,
-                        Settings.serverSettings.multicastAddress + ":" + Settings.serverSettings.multicastPort);
+                        ServerSettings.multicastAddress + ":" + ServerSettings.multicastPort);
+                  //ServerUtils.send
                } else if (key.isReadable()) {
                   System.out.println("La chiave è di tipo READ");
                   SocketChannel clientChannel = (SocketChannel) key.channel();

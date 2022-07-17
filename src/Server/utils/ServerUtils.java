@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.SocketChannel;
 
-import Server.Configs.Settings;
 import Server.Configs.ServerSettings;
 
 public class ServerUtils {
@@ -22,7 +21,6 @@ public class ServerUtils {
         sendInt(clientChannel, msg.getBytes().length);
         while (buffer.hasRemaining())
             clientChannel.write(buffer);
-
     }
 
     public static void sendInt(SocketChannel clientChannel, int n) throws IOException {
@@ -69,7 +67,7 @@ public class ServerUtils {
         try {
             DatagramSocket socket = new DatagramSocket();
             InetAddress address = InetAddress.getByName(ServerSettings.serverAddress);
-            int port = Settings.serverSettings.multicastPort;
+            int port = ServerSettings.multicastPort;
             DatagramPacket packet = new DatagramPacket(message.getBytes(), message.length(), address, port);
             socket.send(packet);
             socket.close();
