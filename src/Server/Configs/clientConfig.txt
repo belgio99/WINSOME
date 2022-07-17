@@ -1,14 +1,9 @@
 # Indirizzo del server
-SERVER=127.0.0.1
-#
-# Host su cui si trova il registry
-RMINAME=localhost
+SERVER=localhost
 #
 # Porta TCP del server
-TCPPORT=9999
-#
-# Porta del registry RMI
-RMIPORT=7777
+TCPPORT=50000
+
 #
 # Timeout della socket
 SOCKTIMEOUT=300000

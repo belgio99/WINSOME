@@ -1,5 +1,6 @@
 package Server;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -9,29 +10,24 @@ import Server.utils.Post;
 
 public class RewardCalculator extends ScheduledThreadPoolExecutor {
 
-   private ConcurrentLinkedQueue<Post> analyzeList;
+   private ConcurrentHashMap<Integer, Post> postDB;
    private int n;
    private TimeUnit unit;
 
-   public RewardCalculator(ConcurrentLinkedQueue<Post> analyzeList) {
+   public RewardCalculator(ConcurrentLinkedQueue<Post> postDB) {
       super(1);
-      this.analyzeList = analyzeList;
+      this.postDB = postDB;
       setValues();
    }
 
-   public void analyzePost(Post p) {
-      analyzeList.add(p);
-   }
-
-   public void discardPost(Post p) {
-      analyzeList.remove(p);
-  }
 
   public void startAnalyzing() {
-     scheduleAtFixedRate(new RewardCalculatorThread(analyzeList), n, n, unit);
+     scheduleAtFixedRate(new RewardCalculatorThread(postDB), n, n, unit);
   }
 
-  //public void stopA
+  public void stopAnalyzing() {
+     shutdown();
+  }
 
    private void setValues() {
         String delay = ServerSettings.rewardDelayTime;

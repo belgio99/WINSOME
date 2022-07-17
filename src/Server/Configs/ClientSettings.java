@@ -8,11 +8,6 @@ public class ClientSettings {
 
    public static String serverAddress;
    public static int TCPPort;
-   public static int UDPPort;
-
-   public static String RMIAddress;
-   public static int RMIPort;
-   public static String RMIName;
 
    static {
       String path = "src/Server/Configs/clientConfig.txt";
@@ -25,11 +20,6 @@ public class ClientSettings {
             TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPORT", 50000)));
             TCPPort = checkValidPort(TCPPort, 50000);
 
-            RMIAddress = (String) settings.getOrDefault("RMIADDR", "localhost");
-            RMIPort = Integer.parseInt(String.valueOf(settings.getOrDefault("RMIPORT", 50003)));
-            RMIPort = checkValidPort(RMIPort, 50003);
-            RMIName = (String) settings.getOrDefault("RMINAME", "ServerRemoteInterface");
-            
             System.out.println("File di configurazione caricato");
          }
          else {
@@ -47,9 +37,6 @@ public class ClientSettings {
       serverAddress = "localhost";
       TCPPort = 50000;
 
-      RMIAddress = "localhost";
-      RMIPort = 50003;
-      RMIName = "ServerRemoteInterface";
       return;
    }
 

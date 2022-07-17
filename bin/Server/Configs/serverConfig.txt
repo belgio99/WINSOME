@@ -1,22 +1,22 @@
-# Indirizzo IP del server
-SERVER = "localhost"
-# Porta del server
+# Indirizzo IP del server (IP in formato testuale, o hostname da risolvere)
+SERVER = localhost
+# Porta del server (0-65535)
 TCPPORT = 50000
-# Indirizzo IP di multicast
+# Indirizzo IP di multicast (IP in formato testuale, o hostname da risolvere)
 MCASTADDR = 239.255.32.32
-# Porta di multicast
+# Porta di multicast (0-65535)
 MCASTPORT = 50000
-# Indirizzo IP RMI
-RMIADDR = "localhost"
-# Porta RMI
+# Indirizzo IP RMI (IP in formato testuale, o hostname da risolvere)
+RMIADDR = localhost
+# Porta RMI (0-65535)
 RMIPORT = 50001
-# Nome RMI
-RMINAME = "Winsome"
-# Percentuale destinata all'autore
-AUTHORPERCENT = 0.5
-# Tempo di timeout del socket
+# Nome RMI (stringa)
+RMINAME = Winsome
+# Percentuale destinata all'autore (0-100)
+AUTHORPERCENT = 50
+# Tempo di timeout del socket (secondi)
 SOCKTIMEOUT = -1
-# Cartella di storage dei file
-STORAGEPATH = "/tmp"
-# Intervallo di calcolo dei reward
+# Cartella di storage dei file (stringa)
+STORAGEPATH = /tmp
+# Intervallo di calcolo dei reward (numero intero e unità di tempo)
 REWARDINTERVAL = 30s

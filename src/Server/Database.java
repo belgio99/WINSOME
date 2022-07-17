@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,15 +22,12 @@ public class Database {
    private ConcurrentHashMap<String, User> userDB; // username -> user
    private ConcurrentHashMap<Integer, Post> postDB; // postID -> post
    private ConcurrentHashMap<String, LinkedList<String>> globalTagsList;
-   private final ConcurrentLinkedQueue<Post> analyzeList; // TODO
    private final Gson gson;
 
-   public Database(ConcurrentLinkedQueue<Post> analyzeList) {
+   public Database() {
       postDB = new ConcurrentHashMap<>();
       globalTagsList = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
-      this.analyzeList = analyzeList;
-
       gson = new GsonBuilder().setPrettyPrinting().create();
 
    }
@@ -41,7 +37,7 @@ public class Database {
       File postDBFile = new File(ServerSettings.storagePath + "/postdb.json");
       File globalTagsListFile = new File(ServerSettings.storagePath + "/globaltagslist.json");
       if (!userDBFile.exists() || !postDBFile.exists() || !globalTagsListFile.exists()) {
-         System.out.println("Impossibile caricare il database! Verrà creato un nuovo database e salvato in " + ServerSettings.storagePath);
+         System.out.println("Database pre-esistente non trovato: Verrà creato un nuovo database e salvato in " + ServerSettings.storagePath);
          return;
       }
       try (FileReader reader = new FileReader(userDBFile)) {
@@ -71,6 +67,7 @@ public class Database {
          System.out.println("Impossibile caricare la lista dei tag!");
          userDB = new ConcurrentHashMap<>();
       }
+      System.out.println("Database pre-esistente in "+ ServerSettings.storagePath + " trovato e caricato.");
    }
 
    public void saveDatabaseToFile() {
@@ -96,6 +93,7 @@ public class Database {
          return;
       }
    }
+
 
    /*
     * public synchronized void updatePost(Post post) {
@@ -131,7 +129,7 @@ public class Database {
 
    public boolean addPost(User author, Post post) throws NullPointerException {
       if (postDB.putIfAbsent(post.getId(), post) != null)
-         return false;
+         return false; //returna false in caso si tratti di un rewin
       author.addToUserPostList((post.getId()));
       return true;
    }

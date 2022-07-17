@@ -11,10 +11,10 @@ public class Post {
    private String content;
    private String author;
    private ConcurrentLinkedQueue<Comment> commentsList;
-   private LinkedHashMap<User, Instant> likersList;
-   private LinkedHashMap<User, Instant> dislikersList;
+   private LinkedHashMap<String, Instant> likersList;
+   private LinkedHashMap<String, Instant> dislikersList;
    private Instant creationTimestamp;
-   private Instant lastUpdateTimestamp;
+   private Instant lastRewardTimestamp;
    private ConcurrentLinkedQueue<String> rewinList;
    private int numIterations;
    
@@ -32,7 +32,7 @@ public class Post {
       dislikersList = new LinkedHashMap<>();
       rewinList = new ConcurrentLinkedQueue<>();
       numIterations = 0;
-      lastUpdateTimestamp = creationTimestamp;
+      lastRewardTimestamp = creationTimestamp;
 
       
       
@@ -85,19 +85,19 @@ public class Post {
       this.commentsList = commentsList;
    }
 
-   public LinkedHashMap<User,Instant> getLikersList() {
+   public LinkedHashMap<String,Instant> getLikersList() {
       return this.likersList;
    }
 
-   public void setLikersList(LinkedHashMap<User,Instant> likersList) {
+   public void setLikersList(LinkedHashMap<String,Instant> likersList) {
       this.likersList = likersList;
    }
 
-   public LinkedHashMap<User,Instant> getDislikersList() {
+   public LinkedHashMap<String,Instant> getDislikersList() {
       return this.dislikersList;
    }
 
-   public void setDislikersList(LinkedHashMap<User,Instant> dislikersList) {
+   public void setDislikersList(LinkedHashMap<String,Instant> dislikersList) {
       this.dislikersList = dislikersList;
    }
 
@@ -109,12 +109,12 @@ public class Post {
       this.creationTimestamp = creationTimestamp;
    }
 
-   public Instant getLastUpdateTimestamp() {
-      return this.lastUpdateTimestamp;
+   public Instant getLastRewardTimestamp() {
+      return this.lastRewardTimestamp;
    }
 
-   public void setLastUpdateTimestamp(Instant lastUpdateTimestamp) {
-      this.lastUpdateTimestamp = lastUpdateTimestamp;
+   public void setLastRewardTimestamp(Instant lastUpdateTimestamp) {
+      this.lastRewardTimestamp = lastUpdateTimestamp;
    }
 
    public ConcurrentLinkedQueue<String> getRewinList() {

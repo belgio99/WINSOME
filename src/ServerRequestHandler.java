@@ -43,7 +43,6 @@ public class ServerRequestHandler implements Runnable {
          buffer.clear();
 
       }
-      System.out.println(clientRequest);
       return clientRequest.toString();
    }
 

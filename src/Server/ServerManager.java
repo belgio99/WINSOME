@@ -24,9 +24,9 @@ import Server.utils.User;
 
 public class ServerManager {
    // private static final Gson gson = new Gson();
-   private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
-   private static final Database database = new Database(analyzeList);
-   private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>();
+   //private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
+   private static final Database database = new Database();
+   private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>(); //mappa degli utenti registrati alle callbacks
    private static final RewardCalculator r1;
 
    private static Selector selector;
@@ -38,7 +38,8 @@ public class ServerManager {
       } catch (IOException e) {
          e.printStackTrace();
       }
-      r1 = new RewardCalculator(analyzeList);
+      r1 = new RewardCalculator();
+      r1.startAnalyzing();
    }
 
    public static void startupServer() {
@@ -47,30 +48,30 @@ public class ServerManager {
    }
 
    public static void shutdownServer() {
+      r1.stopAnalyzing();
       database.saveDatabaseToFile();
       return;
    }
 
    public static int register(String username, String password, LinkedList<String> tagsList) {
-      if (!database.registerUser(username, password, tagsList)) // TODO: controllare perché non funziona il punteggio
-                                                                // delle password
+      if (!database.registerUser(username, password, tagsList))
          return -1;
       int score = 0;
       // se la password è lunga più di 8 caratteri, aumenta il punteggio di 1
       if (password.length() > 8) {
          score += 1;
       } // se la password contiene dei caratteri minuscoli, aumenta il punteggio di 1
-      if (password.matches("[a-z]+")) {
+      if (password.matches(".*[a-z].*")) {
          score += 1;
       } // se la password contiene dei caratteri maiuscoli, aumenta il punteggio di 1
-      if (password.matches("[A-Z]+")) {
+      if (password.matches(".*[A-Z].*")) {
          score += 1;
       }
       // se la password contiene dei numeri, aumenta il punteggio di 1
-      if (password.matches("[0-9]+")) {
+      if (password.matches(".*[0-9].*")) {
          score += 1;
       } // se la password contiene un carattere speciale, aumenta il punteggio di 1
-      if (password.matches("[^a-zA-Z0-9]+")) {
+      if (password.matches(".*[^a-zA-Z0-9].*")) {
          score += 1;
       }
 
@@ -202,17 +203,17 @@ public class ServerManager {
    public static int ratePost(User u, Post post, int vote) {
       if (post.getAuthor().equals(u.getUsername()))
          return -2; // non puoi votare il tuo post
-      if (post.getLikersList().containsKey(u) || post.getDislikersList().containsKey(u))
+      if (post.getLikersList().containsKey(u.getUsername()) || post.getDislikersList().containsKey(u.getUsername()))
          return -3; // non puoi votare un post già votato
       if (!post.getRewinList().contains(u.getUsername()))
          return -4; // non puoi votare un post di cui non hai effettuato il rewin
       switch (vote) {
          case 1:
-            post.getLikersList().put(u, Instant.now());
+            post.getLikersList().put(u.getUsername(), Instant.now());
             break;
 
          case -1:
-            post.getDislikersList().put(u, Instant.now());
+            post.getDislikersList().put(u.getUsername(), Instant.now());
             break;
          default:
             return -1;

@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 
 import Server.ServerManager;
 import Server.Configs.ServerSettings;
-import Server.Configs.Settings;
 import Server.RMI.RemoteService;
 import Server.utils.ServerUtils;
 
@@ -32,7 +31,6 @@ public class ServerMain {
       Selector selector = ServerManager.getSelector();
       ConcurrentLinkedQueue<SocketChannel> registerQueue = new ConcurrentLinkedQueue<>();
       ServerManager.startupServer();
-
       try {
          serverSocketChannel = ServerSocketChannel.open();
          serverSocketChannel.configureBlocking(false);
@@ -90,9 +88,10 @@ public class ServerMain {
                   clientChannel.configureBlocking(false);
                   clientChannel.register(selector, SelectionKey.OP_READ);
                   System.out.println("Nuovo client connesso a " + clientChannel.getRemoteAddress().toString());
+                  ServerUtils.sendString(clientChannel, ServerSettings.RMIAddress + ";" + ServerSettings.RMIPort + ";"
+                  + ServerSettings.RMIName);
                   ServerUtils.sendString(clientChannel,
                         ServerSettings.multicastAddress + ":" + ServerSettings.multicastPort);
-                  //ServerUtils.send
                } else if (key.isReadable()) {
                   System.out.println("La chiave è di tipo READ");
                   SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -101,7 +100,6 @@ public class ServerMain {
                   updateKeySet(selector);
                   threadPool.submit(new Thread(request));
                }
-
                selectedKS.remove(key);
             }
          }
