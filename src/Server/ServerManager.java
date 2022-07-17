@@ -39,10 +39,6 @@ public class ServerManager {
       }
    }
 
-   public static void startupServer() {
-      database.loadDatabaseFromFile();
-      return;
-   }
 
 
    public static int register(String username, String password, LinkedList<String> tagsList) {

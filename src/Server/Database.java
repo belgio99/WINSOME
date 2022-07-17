@@ -30,6 +30,7 @@ public class Database {
       globalTagsMap = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
       gson = new GsonBuilder().setPrettyPrinting().create();
+      loadDatabaseFromFile();
       r1 = new RewardCalculator(postDB);
       r1.startAnalyzing();
 

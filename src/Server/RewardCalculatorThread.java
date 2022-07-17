@@ -30,7 +30,7 @@ public class RewardCalculatorThread implements Runnable {
 
    public void run() {
       synchronized (postDB) {
-         System.out.println("Calcolo dei rewards in corso...");
+         System.out.println("Calcolo dei rewards in corso..."); //TODO Il postDB sembra sempre vuoto e non si capisce perchè
          if (postDB.isEmpty())
             return;
          Iterator<Entry<Integer, Post>> it = postDB.entrySet().iterator();
@@ -45,7 +45,6 @@ public class RewardCalculatorThread implements Runnable {
                for (String username : personAnalyzed) {
                   ServerManager.findUserByUsername(username).addToWincoinList(othersReward);
                }
-
             }
                ServerUtils.sendUDPMessage("Rewards Calcolati!");
          }

@@ -30,7 +30,6 @@ public class ServerMain {
       ExecutorService threadPool = Executors.newCachedThreadPool();
       Selector selector = ServerManager.getSelector();
       ConcurrentLinkedQueue<SocketChannel> registerQueue = new ConcurrentLinkedQueue<>();
-      ServerManager.startupServer();
       try {
          serverSocketChannel = ServerSocketChannel.open();
          serverSocketChannel.configureBlocking(false);
