@@ -23,7 +23,6 @@ public class ClientMain {
     private static CallbackService service;
     private static CallbackService stub;
     private static String username;
-    //private static ClientSettings settings;
 
     public static void main(String[] args) throws Exception {
         try {
@@ -31,10 +30,10 @@ public class ClientMain {
                     new InetSocketAddress(ClientSettings.serverAddress, ClientSettings.TCPPort));
             clientSocketChannel.configureBlocking(true);
             buffer = ByteBuffer.allocate(1024);
-            String RMIInfoString = receiveString(); //ricevo dal server la stringa di configurazione dell'RMI
+            String RMIInfoString = receiveString(); // ricevo dal server la stringa di configurazione dell'RMI
             String[] RMIInfo = RMIInfoString.split(";");
             Registry r1 = LocateRegistry.getRegistry(RMIInfo[0],
-            Integer.parseInt(RMIInfo[1]));
+                    Integer.parseInt(RMIInfo[1]));
             remote = (ServerRemoteInterface) r1.lookup(RMIInfo[2]);
         } catch (UnknownHostException e) {
             System.err.println("Non ho trovato l'host a cui connettermi!");
@@ -46,7 +45,7 @@ public class ClientMain {
             System.err.println("Errore nella connessione al server!");
             System.exit(1);
         }
-        String mcastInfoString = receiveString(); //ricevo dal server la stringa di configurazione del multicast
+        String mcastInfoString = receiveString(); // ricevo dal server la stringa di configurazione del multicast
         String[] mcastInfo = mcastInfoString.split(":");
         Thread multicastThread = new Thread(new ClientMulticastThread(mcastInfo[0], Integer.parseInt(mcastInfo[1])));
         multicastThread.start();
@@ -108,8 +107,10 @@ public class ClientMain {
             }
         } catch (IOException e) {
             System.err.println("Errore di I/O! Probabilmente non si è più connessi al server. Chiusura...");
+            System.exit(1);
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
         if (isUserLoggedIn) {
             logout();

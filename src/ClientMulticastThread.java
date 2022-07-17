@@ -41,7 +41,9 @@ public class ClientMulticastThread implements Runnable {
                return;
             }
             String s = new String(p.getData(), 0, p.getLength());
-            System.out.println(s);
+            System.out.println("");
+            System.out.println("< " + s);
+            System.out.print("> ");
 
          }
          System.out.println("Chiudo thread client multicast...");

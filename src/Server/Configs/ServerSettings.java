@@ -28,8 +28,6 @@ public class ServerSettings {
       String path = "src/Server/Configs/serverConfig.txt";
       Properties settings = new Properties();
       File configFile = new File(path);
-    //  File directory = new File("./");
-    //  System.out.println("Path intero: " + directory.getAbsolutePath());
       try {
          if (configFile.exists()) {
          settings.load(new FileReader(path));

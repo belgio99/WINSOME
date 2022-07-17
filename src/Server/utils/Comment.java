@@ -8,14 +8,10 @@ public class Comment {
    private Instant timestamp;
 
    public Comment(User author, String content) {
-   this.author = author;
-   this.content = content;
-   timestamp = Instant.now();
-}
-
-
-
-
+      this.author = author;
+      this.content = content;
+      timestamp = Instant.now();
+   }
 
    public User getAutore() {
       return this.author;
@@ -33,7 +29,6 @@ public class Comment {
       this.content = contenuto;
    }
 
-
    public Instant getTimestamp() {
       return this.timestamp;
    }
@@ -41,8 +36,6 @@ public class Comment {
    public void setTimestamp(Instant timestamp) {
       this.timestamp = timestamp;
    }
-
-   
 
    public User getAuthor() {
       return this.author;
@@ -59,5 +52,5 @@ public class Comment {
    public void setContent(String content) {
       this.content = content;
    }
-   
+
 }

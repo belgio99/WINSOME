@@ -1,12 +1,12 @@
-# Indirizzo IP del server (IP in formato testuale, o hostname da risolvere)
+# Indirizzo IP del server (IP o hostname)
 SERVER = localhost
 # Porta del server (0-65535)
 TCPPORT = 50000
-# Indirizzo IP di multicast (IP in formato testuale, o hostname da risolvere)
+# Indirizzo IP di multicast (IP o hostname)
 MCASTADDR = 239.255.32.32
 # Porta di multicast (0-65535)
 MCASTPORT = 50000
-# Indirizzo IP RMI (IP in formato testuale, o hostname da risolvere)
+# Indirizzo IP RMI (IP o hostname)
 RMIADDR = localhost
 # Porta RMI (0-65535)
 RMIPORT = 50001
@@ -18,5 +18,5 @@ AUTHORPERCENT = 50
 SOCKTIMEOUT = -1
 # Cartella di storage dei file (stringa)
 STORAGEPATH = /tmp
-# Intervallo di calcolo dei reward (numero intero e unità di tempo)
+# Intervallo di calcolo dei reward (numero intero e unità di tempo in secondi (s), minuti (m), ore (h), giorni (d))
 REWARDINTERVAL = 30s

@@ -21,13 +21,13 @@ public class Database {
 
    private ConcurrentHashMap<String, User> userDB; // username -> user
    private ConcurrentHashMap<Integer, Post> postDB; // postID -> post
-   private ConcurrentHashMap<String, LinkedList<String>> globalTagsList;
+   private ConcurrentHashMap<String, LinkedList<String>> globalTagsMap;
    private final Gson gson;
    private static RewardCalculator r1;
 
    public Database() {
       postDB = new ConcurrentHashMap<>();
-      globalTagsList = new ConcurrentHashMap<>();
+      globalTagsMap = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
       gson = new GsonBuilder().setPrettyPrinting().create();
       r1 = new RewardCalculator(postDB);
@@ -38,8 +38,8 @@ public class Database {
    public void loadDatabaseFromFile() {
       File userDBFile = new File(ServerSettings.storagePath + "/userdb.json");
       File postDBFile = new File(ServerSettings.storagePath + "/postdb.json");
-      File globalTagsListFile = new File(ServerSettings.storagePath + "/globaltagslist.json");
-      if (!userDBFile.exists() || !postDBFile.exists() || !globalTagsListFile.exists()) {
+      File globalTagsMapFile = new File(ServerSettings.storagePath + "/globaltagslist.json");
+      if (!userDBFile.exists() || !postDBFile.exists() || !globalTagsMapFile.exists()) {
          System.out.println("Database pre-esistente non trovato: Verrà creato un nuovo database e salvato in " + ServerSettings.storagePath);
          return;
       }
@@ -59,16 +59,16 @@ public class Database {
          postDB = gson.fromJson(reader, type);
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei post!");
-         userDB = new ConcurrentHashMap<>();
+         postDB = new ConcurrentHashMap<>();
       }
-      try (FileReader reader = new FileReader((globalTagsListFile))) {
-         globalTagsList.clear();
+      try (FileReader reader = new FileReader((globalTagsMapFile))) {
+         globalTagsMap.clear();
          Type type = new TypeToken<ConcurrentHashMap<String, LinkedList<String>>>() {
          }.getType();
-         globalTagsList = gson.fromJson(reader, type);
+         globalTagsMap = gson.fromJson(reader, type);
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei tag!");
-         userDB = new ConcurrentHashMap<>();
+         globalTagsMap = new ConcurrentHashMap<String, LinkedList<String>>();
       }
       System.out.println("Database pre-esistente in "+ ServerSettings.storagePath + " trovato e caricato.");
    }
@@ -90,33 +90,13 @@ public class Database {
          return;
       }
       try (FileWriter writer = new FileWriter(globalTagsListFile)) {
-         gson.toJson(globalTagsList, writer);
+         gson.toJson(globalTagsMap, writer);
       } catch (IOException e) {
          System.out.println("Impossibile salvare la lista dei tag!");
          return;
       }
    }
 
-
-   /*
-    * public synchronized void updatePost(Post post) {
-    * User author = ServerManager.findUserByUsername(post.getAuthor());
-    * if (database.containsKey(author)) {
-    * for (Integer id : database.get(author)) {
-    * postDB.get(id)
-    * }
-    * }
-    * postDB.get(key)
-    * LinkedList<Post> posts = database.get(author);
-    * int index;
-    * if ((index = posts.indexOf(post)) >= 0) {
-    * posts.set(index, post);
-    * return;
-    * }
-    * }
-    * 
-    * }
-    */
    public boolean registerUser(String username, String password, LinkedList<String> tagsList) {
       // E' null se l'utente non esisteva e può essere registrato, altrimenti ritorna
       // un'username dunque il login sarà fallito.
@@ -124,8 +104,8 @@ public class Database {
       Iterator<String> itr = tagsList.iterator();
       while (itr.hasNext()) {
          String newTag = itr.next();
-         globalTagsList.putIfAbsent(newTag, new LinkedList<String>());
-         globalTagsList.get(newTag).add(newUser.getUsername());
+         globalTagsMap.putIfAbsent(newTag, new LinkedList<String>());
+         globalTagsMap.get(newTag).add(newUser.getUsername());
       }
       return userDB.putIfAbsent(username, newUser) == null ? true : false;
    }
@@ -165,7 +145,7 @@ public class Database {
    }
 
    public LinkedList<String> getUsersOfTag(String tag) throws NullPointerException {
-      return globalTagsList.get(tag);
+      return globalTagsMap.get(tag);
    }
 
    public void shutdownDatabase() {

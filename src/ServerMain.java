@@ -79,11 +79,9 @@ public class ServerMain {
                   registerQueue.poll().register(selector, SelectionKey.OP_READ); //prendo il primo elemento della coda e lo registro nel selector
                continue;
             }
-            System.out.println("Ricevuta nuova chiave!");
             Set<SelectionKey> selectedKS = selector.selectedKeys();
             for (SelectionKey key : selectedKS) {
                if (key.isAcceptable()) {
-                  System.out.println("La chiave è di tipo ACCEPT");
                   SocketChannel clientChannel = serverSocketChannel.accept();
                   clientChannel.configureBlocking(false);
                   clientChannel.register(selector, SelectionKey.OP_READ);
@@ -93,11 +91,10 @@ public class ServerMain {
                   ServerUtils.sendString(clientChannel,
                         ServerSettings.multicastAddress + ":" + ServerSettings.multicastPort);
                } else if (key.isReadable()) {
-                  System.out.println("La chiave è di tipo READ");
                   SocketChannel clientChannel = (SocketChannel) key.channel();
                   ServerRequestHandler request = new ServerRequestHandler(clientChannel, selector, registerQueue);
                   key.cancel();
-                  updateKeySet(selector);
+                  // updateKeySet(selector);
                   threadPool.submit(new Thread(request));
                }
                selectedKS.remove(key);
@@ -114,11 +111,11 @@ public class ServerMain {
       }
    }
 
-   private static void updateKeySet(Selector selector) {
-      try {
-         selector.selectNow();
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-   }
+   // private static void updateKeySet(Selector selector) {
+   //    try {
+   //       selector.selectNow();
+   //    } catch (IOException e) {
+   //       e.printStackTrace();
+   //    }
+   // }
 }

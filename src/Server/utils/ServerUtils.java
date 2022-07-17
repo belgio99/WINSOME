@@ -14,7 +14,6 @@ public class ServerUtils {
 
     public static void sendString(SocketChannel clientChannel, String msg) throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-        System.out.println(msg.getBytes().length);
         sendInt(clientChannel, msg.getBytes().length);
         while (buffer.hasRemaining())
             clientChannel.write(buffer);
