@@ -154,5 +154,13 @@ public class User {
    public LinkedList<Integer> getUserPostList() {
       return this.userPostList;
    }
+   public void removeFromUserRewinList (int postId) {
+      Iterator<Integer> it = userPostList.iterator();
+      while (it.hasNext()) {
+         if (it.next() == postId) {
+            it.remove();
+         }
+      }
+   }
 
 }

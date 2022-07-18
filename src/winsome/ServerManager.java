@@ -24,7 +24,7 @@ import winsome.datastructures.Post;
 import winsome.datastructures.User;
 import winsome.utils.Scheduler;
 
-public class ServerManager { //TODO: verificare ogni richiesta
+public class ServerManager {
    private static final Database database = new Database();
    private static Selector selector;
    private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>(); //mappa degli utenti registrati alle callbacks
@@ -70,6 +70,8 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static User login(String username, String password, SocketChannel clientChannel) {
+      if (username == null || password == null || clientChannel == null)
+         return null; 
       User user = database.findUserByUsername(username);
       if (user == null)
          return null;
@@ -84,6 +86,8 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static int logout(SocketChannel clientChannel) {
+      if (clientChannel == null)
+         return 0;
       try {
          return usersLogged.remove(clientChannel) == null ? -1 : 0;
       } catch (NullPointerException e) {
@@ -92,14 +96,18 @@ public class ServerManager { //TODO: verificare ogni richiesta
 
    }
 
-   public synchronized static Post createPost(String title, String content, User author) {
+   public static Post createPost(String title, String content, User author) {
+      if (author == null || title == null || content == null)
+         return null;
       Post post = new Post(database.getPreviousMaxPostID() + 1, author.getUsername(), title, content);
       database.addPost(author, post);
       // database.saveDatabase();
       return post;
    }
 
-   public synchronized static int deletePost(Post post) {
+   public static int deletePost(Post post) {
+      if (post == null)
+         return -1;
       try {
          database.deletePost(post);
          analyzeList.remove(post);
@@ -133,7 +141,7 @@ public class ServerManager { //TODO: verificare ogni richiesta
       return usersLogged.get(clientChannel);
    }
 
-   public synchronized static int followUser(User u, String usernameToFollow) {
+   public static int followUser(User u, String usernameToFollow) {
       if (u == null || usernameToFollow == null)
          return -1;
       if (u.getUsername().equals(usernameToFollow))
@@ -154,7 +162,7 @@ public class ServerManager { //TODO: verificare ogni richiesta
       return 0;
    }
 
-   public synchronized static int unfollowUser(User u, String usernameToUnfollow) {
+   public static int unfollowUser(User u, String usernameToUnfollow) {
       if (u == null || usernameToUnfollow == null)
          return -1;
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
@@ -198,6 +206,8 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static int ratePost(User u, Post post, int vote) {
+      if (post == null || u == null)
+         return -1;
       if (post.getAuthor().equals(u.getUsername()))
          return -2; // non puoi votare il tuo post
       if (post.getLikersList().containsKey(u.getUsername()) || post.getDislikersList().containsKey(u.getUsername()))
@@ -252,6 +262,8 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static HashMap<String,LinkedList<String>> listUsers(User u) {
+      if (u == null)
+         return null;
       HashMap<String,LinkedList<String>> returnMap = new HashMap<>();
       for (String tag : u.getTags())
          for (String username : database.getUsersOfTag(tag))
@@ -261,12 +273,16 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static HashMap<String, LinkedList<String>> listFollowing(User u) {
+      if (u == null)
+         return null;
       HashMap<String, LinkedList<String>> returnMap = new HashMap<>();
       for (String username : u.getFollowing())
          returnMap.put(username, database.findUserByUsername(username).getTags());
       return returnMap;
    }
    public static HashMap<String, LinkedList<String>> listFollowers(User u) {
+      if (u == null)
+         return null;
       HashMap<String, LinkedList<String>> returnMap = new HashMap<>();
       for (String username : u.getFollowers())
          returnMap.put(username, database.findUserByUsername(username).getTags());
@@ -274,6 +290,8 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static LinkedList<Post> showFeed(User u) {
+      if (u == null)
+         return null;
       LinkedList<Post> feedList = new LinkedList<>();
 
       for (String followingUser : u.getFollowing()) {
@@ -295,6 +313,8 @@ public class ServerManager { //TODO: verificare ogni richiesta
    }
 
    public static LinkedList<String> receiveFollowersList(String username) {
+      if (username == null)
+         return null;
       User u = database.findUserByUsername(username);
       if (u == null)
          return null;

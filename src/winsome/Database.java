@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,9 +23,10 @@ public class Database {
    private ConcurrentHashMap<String, User> userDB; // username -> user
    private ConcurrentHashMap<Integer, Post> postDB; // postID -> post
    private ConcurrentHashMap<String, LinkedList<String>> globalTagsMap;
+   private volatile Boolean dbEdited = false;
    private final Gson gson;
 
-   public Database() { //TODO: mettere l'autosalvataggio solo se db modificato
+   public Database() {
       postDB = new ConcurrentHashMap<>();
       globalTagsMap = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
@@ -71,28 +73,36 @@ public class Database {
       System.out.println("Database pre-esistente in "+ ServerSettings.storagePath + " trovato e caricato.");
    }
 
-   public void saveDatabaseToFile() {
+   public synchronized void saveDatabaseToFile() {
+      if (!dbEdited)
+         return;
       File userDBFile = new File(ServerSettings.storagePath + "/userdb.json");
       File postDBFile = new File(ServerSettings.storagePath + "/postdb.json");
       File globalTagsListFile = new File(ServerSettings.storagePath + "/globaltagslist.json");
+      synchronized (userDB) {
       try (FileWriter writer = new FileWriter(userDBFile)) {
          gson.toJson(userDB, writer);
       } catch (IOException e) {
          System.out.println("Impossibile salvare il database!");
          return;
       }
+   }
+      synchronized (postDB) {
       try (FileWriter writer = new FileWriter(postDBFile)) {
          gson.toJson(postDB, writer);
       } catch (IOException e) {
          System.out.println("Impossibile salvare la lista dei post!");
          return;
       }
+   }
+      synchronized (globalTagsMap) {
       try (FileWriter writer = new FileWriter(globalTagsListFile)) {
          gson.toJson(globalTagsMap, writer);
       } catch (IOException e) {
          System.out.println("Impossibile salvare la lista dei tag!");
          return;
       }
+   }
    }
 
    public boolean registerUser(String username, String password, LinkedList<String> tagsList) {
@@ -105,6 +115,7 @@ public class Database {
          globalTagsMap.putIfAbsent(newTag, new LinkedList<String>());
          globalTagsMap.get(newTag).add(newUser.getUsername());
       }
+      dbEdited = true;
       return userDB.putIfAbsent(username, newUser) == null ? true : false;
    }
 
@@ -112,13 +123,22 @@ public class Database {
       if (postDB.putIfAbsent(post.getId(), post) != null)
          return false;
       u.addToUserPostList((post.getId()));
+      dbEdited = true;
       return true;
    }
 
    public void deletePost(Post post) throws NullPointerException {
       User author = ServerManager.findUserByUsername(post.getAuthor());
+      ConcurrentLinkedQueue<String> rewinList = post.getRewinList();
+      Iterator<String> itr = rewinList.iterator();
+      while (itr.hasNext()) {
+         String username = itr.next();
+         User u = ServerManager.findUserByUsername(username);
+         u.removeFromUserRewinList(post.getId());
+      }
       author.removeFromUserPostList(post.getId());
       postDB.remove(post.getId());
+      dbEdited = true;
       return;
    }
 
