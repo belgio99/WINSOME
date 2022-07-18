@@ -35,14 +35,14 @@ public class ClientMain {
             buffer = ByteBuffer.allocate(1024);
             String RMIInfoString = receiveString(); // ricevo dal server la stringa di configurazione dell'RMI
             String[] RMIInfo = RMIInfoString.split(";");
-            Registry r1 = LocateRegistry.getRegistry(RMIInfo[0],
-                    Integer.parseInt(RMIInfo[1]));
+            RMIInfo[0] = RMIInfo[0].split("/")[0];
+            Registry r1 = LocateRegistry.getRegistry(RMIInfo[0], Integer.parseInt(RMIInfo[1]));
             remote = (ServerRemoteInterface) r1.lookup(RMIInfo[2]);
         } catch (UnknownHostException e) {
             System.err.println("Non ho trovato l'host a cui connettermi!");
             System.exit(1);
         } catch (IOException e) {
-            System.err.println("Non trovo il server! Chiusura...");
+            System.err.println("Errore di I/O! Chiusura...");
             System.exit(1);
         } catch (Exception e) {
             System.err.println("Errore nella connessione al server!");
@@ -58,9 +58,9 @@ public class ClientMain {
         Thread multicastThread = new Thread(new ClientMulticastThread(multicastSocket));
         multicastThread.setDaemon(true);
         multicastThread.start();
+        followersList = new LinkedList<>();
         service = new NotifyClient(followersList);
         stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
-        followersList = new LinkedList<>();
         Scanner scanner = new Scanner(System.in);
         String input;
         System.out.println("Connesso a " + clientSocketChannel.getRemoteAddress());

@@ -8,14 +8,14 @@
          "type": "java",
          "name": "Server",
          "request": "launch",
-         "mainClass": "${workspaceFolder}/src/ServerMain.java",
+         "mainClass": "${workspaceFolder}/src/winsome/ServerMain.java",
          "projectName": "WINSOME_bcd4babe"
       },
       {
          "type": "java",
          "name": "Client",
          "request": "launch",
-         "mainClass": "${workspaceFolder}/src/ClientMain.java",
+         "mainClass": "${workspaceFolder}/src/winsome/ClientMain.java",
          "projectName": "WINSOME_bcd4babe",
          "vmArgs": "-Djava.net.preferIPv4Stack=true"
       }

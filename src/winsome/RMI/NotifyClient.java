@@ -15,11 +15,12 @@ public class NotifyClient extends RemoteObject implements CallbackService {
        lock = new ReentrantLock();
    }
 
-   /* Metodi per l'aggiornamento della lista di followers */
+   // Aggiornamento della lista dei follower (inserimento e rimozione dalla lista)
    public void notifyNewFollower(String username) throws RemoteException {
        try {
            lock.lock();
            followers.add(username);
+           System.out.println("Nuovo follower! " + username);
        } finally {
            lock.unlock();
        }
@@ -29,10 +30,10 @@ public class NotifyClient extends RemoteObject implements CallbackService {
        try {
            lock.lock();
            followers.remove(username);
+           System.out.println("Unfollower! " + username);
        } finally {
            lock.unlock();
        }
-
    }
 
 }

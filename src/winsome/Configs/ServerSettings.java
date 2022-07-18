@@ -33,7 +33,7 @@ public class ServerSettings {
       try {
          if (configFile.exists()) {
          settings.load(new FileReader(path));
-         serverAddress = (String)settings.getOrDefault("SERVER", InetAddress.getLoopbackAddress().toString());
+         serverAddress = (String)settings.getOrDefault("SERVER", "localhost");
          TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPORT", 50000)));
          TCPPort = checkValidPort(TCPPort, 50000);
 
@@ -41,7 +41,7 @@ public class ServerSettings {
          multicastPort = Integer.parseInt(String.valueOf(settings.getOrDefault("MCASTPORT", 50001)));
          multicastPort = checkValidPort(multicastPort, 50001);
 
-         RMIAddress = (String)settings.getOrDefault("RMIADDR", InetAddress.getLoopbackAddress().toString());
+         RMIAddress = (String)settings.getOrDefault("RMIADDR", "localhost");
          RMIPort = Integer.parseInt(String.valueOf(settings.getOrDefault("RMIPORT", 50003)));
          RMIPort = checkValidPort(RMIPort, 50002);
 
