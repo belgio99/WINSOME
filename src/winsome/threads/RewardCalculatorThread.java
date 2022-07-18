@@ -38,19 +38,19 @@ public class RewardCalculatorThread implements Runnable {
          System.out.println("Calcolo dei rewards in corso...");
          while (!analyzeList.isEmpty()) {
             Post p = analyzeList.poll();
-               HashSet<String> personAnalyzed = analyzePost(p); //analizza il post per ottenere chi ha interagito con esso, per ottenere i rewards
+               HashSet<String> likers = analyzePost(p); //analizza il post per ottenere chi ha interagito con esso, per ottenere i rewards
                double authorReward = round((reward * ServerSettings.authorPercentage) / 100, 1);
                if (authorReward > 0)
                   ServerManager.findUserByUsername(p.getAuthor()).addToWincoinList(reward);
-               if (personAnalyzed.size() > 0) {
-                  double othersReward = round((reward - authorReward) / personAnalyzed.size(), 1);
-                  for (String username : personAnalyzed) {
+                  if (likers.size()>0) {
+                  double othersReward = round((reward - authorReward) / likers.size(), 1);
+                  for (String username : likers) {
                      User u = ServerManager.findUserByUsername(username);
                      u.addToWincoinList(othersReward);
                
                }
-               }
-            
+               
+                  }
          }
       }
       synchronized (postDB) {
@@ -68,7 +68,7 @@ public class RewardCalculatorThread implements Runnable {
    }
    }
 
-   private boolean isBetweenDates(Instant date) {
+   private boolean isAfterLastUpdate(Instant date) {
       if (lastDate == null)
          return true;
       return (Duration.between(lastDate, date).toNanos() >= 0); //Se date è maggiore o uguale a lastDate e minore o uguale a currentDate
@@ -85,7 +85,7 @@ public class RewardCalculatorThread implements Runnable {
       int likersCounter = 0, dislikersCounter = 0;
       Set<String> keys = p.getLikersList().keySet(); // prendo tutti i liker dell'post
       for (String key : keys) {
-         if (isBetweenDates(p.getLikersList().get(key))) { // se l'utente ha likeato il post entro le date dell'ultimo
+         if (isAfterLastUpdate(p.getLikersList().get(key))) { // se l'utente ha likeato il post entro le date dell'ultimo
                                                            // aggiornamento lo aggiungo al set e aumento il contatore di
                                                            // likes
             likersCounter++;
@@ -96,15 +96,14 @@ public class RewardCalculatorThread implements Runnable {
 
       keys = p.getDislikersList().keySet(); // prendo tutti i disliker dell'post
       for (String key : keys) {
-         if (isBetweenDates(p.getDislikersList().get(key))) { // faccio la stessa cosa per i disliker
+         if (isAfterLastUpdate(p.getDislikersList().get(key))) { // faccio la stessa cosa per i disliker
             dislikersCounter++;
-            set.add(key);
          }
       }
       System.out.println("Ci sono dislikes: " + dislikersCounter);
 
       double n1 = getn1(likersCounter, dislikersCounter);
-      HashMap<String, Integer> map = commentCounter(p, set);
+      HashMap<String, Integer> map = commentCounter(p, set); // conto quanti commenti ha fatto ogni utente
       double n2 = 0;
       for (String user : map.keySet()) {
          n2 = getn2(map.get(user));
@@ -128,18 +127,21 @@ public class RewardCalculatorThread implements Runnable {
    }
 
    private HashMap<String, Integer> commentCounter(Post p, HashSet<String> set) {
+      //Metodo per contare quanti commenti ha fatto ogni utente in quel post
       HashMap<String, Integer> map = new HashMap<>(p.getCommentsList().size());
       for (Comment c : p.getCommentsList()) {
-         if (!isBetweenDates(c.getTimestamp()))
-            break;
+         if (isAfterLastUpdate(c.getTimestamp())) {
 
          String author = c.getAuthor();
          if (map.containsKey(author)) {
             int value = map.get(author);
             map.replace(author, value + 1);
-         } else
+         } else {
+            set.add(author);
             map.put(author, 1);
+         }
       }
+   }
       return map;
    }
 
