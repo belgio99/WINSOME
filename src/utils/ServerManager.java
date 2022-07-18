@@ -13,7 +13,6 @@ import java.nio.channels.SocketChannel;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -295,10 +294,6 @@ public class ServerManager {
 
       for (String followingUser : u.getFollowing()) {
          feedList.addAll(database.getUserPosts(database.findUserByUsername(followingUser)));
-         
-       
-         
-      //show even rewin posts
       }
       Collections.shuffle(feedList);
       return feedList;
@@ -319,10 +314,7 @@ public class ServerManager {
          return null;
       ConcurrentLinkedQueue<String> queue = u.getFollowers();
       LinkedList<String> returnList = new LinkedList<>();
-      Iterator<String> itr = queue.iterator();
-      while (itr.hasNext()) {
-         returnList.add(itr.next());
-      }
+      returnList.addAll(queue);
       return returnList;
 
    }

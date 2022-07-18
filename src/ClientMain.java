@@ -178,7 +178,7 @@ public class ClientMain {
             remote.unregisterForCallback(username, stub);
             System.out.println("< Operazione completata");
         } else {
-            System.out.println("< Logout fallito!"); // Ricevo la stringa con il messaggio di errore
+            System.out.println("< Logout fallito!");
         }
     }
 

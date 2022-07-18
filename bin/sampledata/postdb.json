@@ -1,0 +1,37 @@
+{
+  "1": {
+    "ID": 1,
+    "title": "test",
+    "content": "ciao",
+    "author": "user2",
+    "commentsList": [
+      {
+        "author": "user1",
+        "content": "wow",
+        "timestamp": {
+          "seconds": 1658173898,
+          "nanos": 736000000
+        }
+      }
+    ],
+    "likersList": {
+      "user1": {
+        "seconds": 1658173970,
+        "nanos": 13000000
+      }
+    },
+    "dislikersList": {},
+    "creationTimestamp": {
+      "seconds": 1658173889,
+      "nanos": 558000000
+    },
+    "lastUpdateTimestamp": {
+      "seconds": 1658173889,
+      "nanos": 558000000
+    },
+    "rewinList": [
+      "user1"
+    ],
+    "numIterations": 15
+  }
+}

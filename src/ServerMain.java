@@ -38,7 +38,6 @@ public class ServerMain {
 
          serverSocketChannel.configureBlocking(false);
          serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-         // buffer = ByteBuffer.allocate(1024);
          RemoteService regService = new RemoteService();
          Registry r1 = LocateRegistry.createRegistry(ServerSettings.RMIPort);
          r1.bind(ServerSettings.RMIName, regService);
@@ -93,7 +92,6 @@ public class ServerMain {
                   SocketChannel clientChannel = (SocketChannel) key.channel();
                   ServerRequestHandler request = new ServerRequestHandler(clientChannel, selector, registerQueue);
                   key.cancel();
-                  // updateKeySet(selector);
                   threadPool.submit(new Thread(request));
                }
                selectedKS.remove(key);
@@ -104,17 +102,9 @@ public class ServerMain {
 
       catch (IOException e) {
          System.err.println("Errore di I/O!");
-         // continue;
       } catch (ClosedSelectorException e) {
          System.out.println("Spegnimento del server...");
       }
    }
 
-   // private static void updateKeySet(Selector selector) {
-   //    try {
-   //       selector.selectNow();
-   //    } catch (IOException e) {
-   //       e.printStackTrace();
-   //    }
-   // }
 }

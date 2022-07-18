@@ -14,8 +14,6 @@ RMIPORT = 50001
 RMINAME = Winsome
 # Percentuale destinata all'autore (0-100)
 AUTHORPERCENT = 50
-# Tempo di timeout del socket (secondi)
-SOCKTIMEOUT = -1
 # Cartella di storage dei file (stringa)
 STORAGEPATH = /tmp
 # Intervallo di calcolo dei reward (numero intero e unità di tempo in secondi (s), minuti (m), ore (h), giorni (d))

@@ -1,0 +1,90 @@
+{
+  "user1": {
+    "username": "user1",
+    "password": "30c952fab122c3f9759f02a6d95c3758b246b4fee239957b2d4fee46e26170c4",
+    "tags": [
+      "music",
+      "f1",
+      "sport"
+    ],
+    "following": [
+      "user2"
+    ],
+    "followers": [
+      "user2"
+    ],
+    "wincoinList": [
+      {
+        "winCoin": 0.1,
+        "timestamp": {
+          "seconds": 1658173935,
+          "nanos": 495000000
+        }
+      },
+      {
+        "winCoin": 0.1,
+        "timestamp": {
+          "seconds": 1658174024,
+          "nanos": 330000000
+        }
+      }
+    ],
+    "userPostList": [
+      1,
+      1
+    ],
+    "currentCompensation": 0.0
+  },
+  "user2": {
+    "username": "user2",
+    "password": "30c952fab122c3f9759f02a6d95c3758b246b4fee239957b2d4fee46e26170c4",
+    "tags": [
+      "music"
+    ],
+    "following": [
+      "user1"
+    ],
+    "followers": [
+      "user1"
+    ],
+    "wincoinList": [
+      {
+        "winCoin": 0.2,
+        "timestamp": {
+          "seconds": 1658172976,
+          "nanos": 798000000
+        }
+      },
+      {
+        "winCoin": 0.3,
+        "timestamp": {
+          "seconds": 1658173932,
+          "nanos": 23000000
+        }
+      },
+      {
+        "winCoin": 0.2,
+        "timestamp": {
+          "seconds": 1658174016,
+          "nanos": 280000000
+        }
+      }
+    ],
+    "userPostList": [
+      1
+    ],
+    "currentCompensation": 0.0
+  },
+  "user3": {
+    "username": "user3",
+    "password": "30c952fab122c3f9759f02a6d95c3758b246b4fee239957b2d4fee46e26170c4",
+    "tags": [
+      "sport"
+    ],
+    "following": [],
+    "followers": [],
+    "wincoinList": [],
+    "userPostList": [],
+    "currentCompensation": 0.0
+  }
+}

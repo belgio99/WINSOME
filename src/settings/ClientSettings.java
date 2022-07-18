@@ -11,7 +11,7 @@ public class ClientSettings {
    public static int socketTimeout;
 
    static {
-      String path = "./clientConfig.txt";
+      String path = "bin/clientConfig.txt";
       Properties settings = new Properties();
       File configFile = new File(path);
       try {

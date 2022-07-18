@@ -17,7 +17,6 @@ public class ServerSettings {
    public static int RMIPort;
    public static String RMIName;
 
-   public static int socketTimeout;
    public static String storagePath;
 
    public static String rewardDelayTime;
@@ -27,7 +26,7 @@ public class ServerSettings {
 
    
    static {
-      String path = "./serverConfig.txt";
+      String path = "bin/serverConfig.txt";
       Properties settings = new Properties();
       File configFile = new File(path);
       try {
@@ -48,7 +47,6 @@ public class ServerSettings {
          RMIName = (String)settings.getOrDefault("RMINAME", "Winsome");
 
          authorPercentage = Integer.parseInt(String.valueOf(settings.getOrDefault("AUTHORPERCENT", 50)));
-         socketTimeout = Integer.parseInt(String.valueOf(settings.getOrDefault("SOCKETTIMEOUT", -1)));
         
          storagePath = (String) settings.getOrDefault("STORAGEPATH", "/tmp");
          rewardDelayTime = (String) settings.getOrDefault("REWARDINTERVAL", -1);       
@@ -81,7 +79,6 @@ public class ServerSettings {
       RMIName = "ServerRemoteInterface";
 
       authorPercentage = 50;
-      socketTimeout = -1;
       storagePath = "/tmp";
       rewardDelayTime = "30s";
       autoSaveTime = "30s";

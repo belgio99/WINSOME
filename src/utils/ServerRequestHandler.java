@@ -217,8 +217,6 @@ public class ServerRequestHandler implements Runnable {
    private String deletePost(User u, String[] requestSplit) {
       requestSplit[1] = requestSplit[1].trim();
       int postID;
-      if (requestSplit.length < 2)
-         return "L'input non è corretto!";
       try {
          postID = Integer.parseInt(requestSplit[1]);
       } catch (IllegalArgumentException e) {
@@ -234,7 +232,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String followUser(User u, String[] requestSplit) {
       requestSplit[1] = requestSplit[1].trim();
-      if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty())
+      if (requestSplit[1].trim().isEmpty())
          return "L'input non è corretto!";
 
       switch (ServerManager.followUser(u, requestSplit[1])) {
@@ -251,7 +249,7 @@ public class ServerRequestHandler implements Runnable {
 
    private String unfollowUser(User u, String[] requestSplit) {
       requestSplit[1] = requestSplit[1].trim();
-      if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty())
+      if (requestSplit[1].trim().isEmpty())
          return "L'input non è corretto!";
 
       switch (ServerManager.unfollowUser(u, requestSplit[1])) {
@@ -319,7 +317,7 @@ public class ServerRequestHandler implements Runnable {
    private String rewinPost(User u, String[] requestSplit) {
       int postID;
       requestSplit[1] = requestSplit[1].trim();
-      if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty())
+      if (requestSplit[1].trim().isEmpty())
          return "L'input non è corretto!";
       try {
          postID = Integer.parseInt(requestSplit[1]);

@@ -67,7 +67,7 @@ public class Database {
             globalTagsMap = new ConcurrentHashMap<>();
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei tag!");
-         globalTagsMap = new ConcurrentHashMap<String, LinkedList<String>>();
+         globalTagsMap = new ConcurrentHashMap<>();
       }
       System.out.println("Database pre-esistente in "+ ServerSettings.storagePath + " trovato e caricato.");
    }
@@ -109,7 +109,7 @@ public class Database {
       Iterator<String> itr = tagsList.iterator();
       while (itr.hasNext()) {
          String newTag = itr.next().toLowerCase();
-         globalTagsMap.putIfAbsent(newTag, new LinkedList<String>());
+         globalTagsMap.putIfAbsent(newTag, new LinkedList<>());
          globalTagsMap.get(newTag).add(newUser.getUsername());
       }
       return userDB.putIfAbsent(username, newUser) == null ? true : false;
