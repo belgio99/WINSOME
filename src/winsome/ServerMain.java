@@ -53,16 +53,17 @@ public class ServerMain {
                   serverSocketChannel.close();
                   UnicastRemoteObject.unexportObject(regService, false);
                   r1.unbind(ServerSettings.RMIName);
-                  Thread.sleep(200);
+                  threadPool.shutdown();
                   ServerManager.shutdown();
+                  ServerManager.saveServerState();
 
                } catch (Exception e) {
                   Thread.currentThread().interrupt();
                   e.printStackTrace();
+                  System.exit(1);
                }
             }
          });
-
       } catch (IOException e) {
          System.err.println("Errore di I/O! Impossibile avviare il server!");
          System.exit(1);

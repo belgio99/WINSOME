@@ -1,5 +1,9 @@
 package winsome.datastructures;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -17,7 +21,7 @@ public class User {
 
    public User(String username, String password, LinkedList<String> tags) {
       this.username = username;
-      this.password = password;
+      this.password = hashEncrypt(password);
       this.tags = tags;
       this.following = new ConcurrentLinkedQueue<>();
       this.followers = new ConcurrentLinkedQueue<>();
@@ -26,6 +30,31 @@ public class User {
       this.currentCompensation = 0;
 
    }
+
+   public static String hashEncrypt(String password) {
+      String encryptedPassword = "";
+      try {
+          encryptedPassword = toHexString(getSHA(password));
+      } catch (NoSuchAlgorithmException e) {
+          System.out.println("Algoritmo di crittografia non trovato!");
+      }
+      return encryptedPassword;
+  }
+  public static byte[] getSHA(String input) throws NoSuchAlgorithmException {
+        // Creo un'istanza di messagedigest per calcolare l'hash, utilizzando l'algoritmo SHA-256
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        // faccio il vero e proprio digest, che ritorna un array di byte
+        return md.digest(input.getBytes(StandardCharsets.UTF_8));
+    }
+    public static String toHexString(byte[] hash) {
+        // Converto l'array di byte in un BigInteger 
+        BigInteger number = new BigInteger(1, hash);
+        // Converto poi in una stringa di caratteri esadecimali, utilizzando StringBuilder in modo da poter inserire gli zeri iniziali
+        StringBuilder hexString = new StringBuilder(number.toString(16));
+        while (hexString.length() < 32)
+            hexString.insert(0, '0');
+        return hexString.toString();
+    }
 
    public void addToWincoinList(double reward) {
       if (reward > 0) {

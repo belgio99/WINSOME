@@ -44,6 +44,8 @@ public class Database {
       try (FileReader reader = new FileReader(userDBFile)) {
          userDB.clear();
          userDB = gson.fromJson(reader, new TypeToken<ConcurrentHashMap<String, User>>(){}.getType());
+         if (userDB == null)
+            userDB = new ConcurrentHashMap<>();
       } catch (Exception e) {
          System.out.println("File del database non presente o non valido.");
          userDB = new ConcurrentHashMap<>();
@@ -51,6 +53,8 @@ public class Database {
       try (FileReader reader = new FileReader((postDBFile))) {
          postDB.clear();
          postDB = gson.fromJson(reader, new TypeToken<ConcurrentHashMap<Integer, Post>>() {}.getType());
+         if (postDB == null)
+            postDB = new ConcurrentHashMap<>();
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei post!");
          postDB = new ConcurrentHashMap<>();
@@ -58,6 +62,8 @@ public class Database {
       try (FileReader reader = new FileReader((globalTagsMapFile))) {
          globalTagsMap.clear();
          globalTagsMap = gson.fromJson(reader, new TypeToken<ConcurrentHashMap<String, LinkedList<String>>>() {}.getType());
+         if (globalTagsMap == null)
+            globalTagsMap = new ConcurrentHashMap<>();
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei tag!");
          globalTagsMap = new ConcurrentHashMap<String, LinkedList<String>>();
@@ -133,16 +139,15 @@ public class Database {
    }
 
    public int getPreviousMaxPostID() {
+      synchronized (postDB) {
       return postDB.size();
+      }
    }
 
    public LinkedList<String> getUsersOfTag(String tag) throws NullPointerException {
       return globalTagsMap.get(tag);
    }
 
-   public void shutdownDatabase() {
-      saveDatabaseToFile();
-   }
    public ConcurrentHashMap<Integer, Post> getPostDB() {
       return postDB;
    }

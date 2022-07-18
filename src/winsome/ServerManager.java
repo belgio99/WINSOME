@@ -76,7 +76,7 @@ public class ServerManager {
       User user = database.findUserByUsername(username);
       if (user == null)
          return null;
-      if (!password.equals(user.getPassword()))
+      if (!User.hashEncrypt(password).equals(user.getPassword()))
          return null;
       if (usersLogged.get(clientChannel) == null) {
          usersLogged.put(clientChannel, user);
@@ -280,7 +280,8 @@ public class ServerManager {
    public static void shutdown() {
       for (SocketChannel cc : usersLogged.keySet())
          logout(cc);
-      database.shutdownDatabase();
+      r1.stop();
+      database.saveDatabaseToFile();
    }
 
    public static LinkedList<String> receiveFollowersList(String username) {

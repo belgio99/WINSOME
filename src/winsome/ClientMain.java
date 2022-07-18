@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.rmi.registry.LocateRegistry;
@@ -114,7 +115,7 @@ public class ClientMain {
                 System.out.print("> ");
                 buffer.clear();
             }
-        } catch (IOException e) {
+        } catch (IOException | BufferUnderflowException e) {
             System.err.println("Errore di I/O! Probabilmente non si è più connessi al server. Chiusura...");
             System.exit(1);
         } catch (Exception e) {
