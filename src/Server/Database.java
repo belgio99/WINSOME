@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +22,7 @@ public class Database {
    private ConcurrentHashMap<Integer, Post> postDB; // postID -> post
    private ConcurrentHashMap<String, LinkedList<String>> globalTagsMap;
    private final Gson gson;
-   private static RewardCalculator r1;
+   private static Scheduler r1;
 
    public Database() {
       postDB = new ConcurrentHashMap<>();
@@ -31,8 +30,8 @@ public class Database {
       userDB = new ConcurrentHashMap<>();
       gson = new GsonBuilder().setPrettyPrinting().create();
       loadDatabaseFromFile();
-      r1 = new RewardCalculator(postDB);
-      r1.startAnalyzing();
+      r1 = new Scheduler(postDB);
+      r1.start();
 
    }
 
@@ -46,27 +45,21 @@ public class Database {
       }
       try (FileReader reader = new FileReader(userDBFile)) {
          userDB.clear();
-         Type type = new TypeToken<ConcurrentHashMap<String, User>>() {
-         }.getType();
-         userDB = gson.fromJson(reader, type);
+         userDB = gson.fromJson(reader, new TypeToken<ConcurrentHashMap<String, User>>(){}.getType());
       } catch (Exception e) {
          System.out.println("File del database non presente o non valido.");
          userDB = new ConcurrentHashMap<>();
       }
       try (FileReader reader = new FileReader((postDBFile))) {
          postDB.clear();
-         Type type = new TypeToken<ConcurrentHashMap<Integer, Post>>() {
-         }.getType();
-         postDB = gson.fromJson(reader, type);
+         postDB = gson.fromJson(reader, new TypeToken<ConcurrentHashMap<Integer, Post>>() {}.getType());
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei post!");
          postDB = new ConcurrentHashMap<>();
       }
       try (FileReader reader = new FileReader((globalTagsMapFile))) {
          globalTagsMap.clear();
-         Type type = new TypeToken<ConcurrentHashMap<String, LinkedList<String>>>() {
-         }.getType();
-         globalTagsMap = gson.fromJson(reader, type);
+         globalTagsMap = gson.fromJson(reader, new TypeToken<ConcurrentHashMap<String, LinkedList<String>>>() {}.getType());
       } catch (Exception e) {
          System.out.println("Impossibile caricare la lista dei tag!");
          globalTagsMap = new ConcurrentHashMap<String, LinkedList<String>>();

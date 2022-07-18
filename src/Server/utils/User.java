@@ -28,7 +28,9 @@ public class User {
    }
 
    public void addToWincoinList(double reward) {
-      wincoinList.add(new Transaction(reward));
+      if (reward > 0) {
+         wincoinList.add(new Transaction(reward));
+      }
    }
 
    public void addToUserPostList(int postId) {

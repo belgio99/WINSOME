@@ -14,7 +14,7 @@ public class Post {
    private LinkedHashMap<String, Instant> likersList;
    private LinkedHashMap<String, Instant> dislikersList;
    private Instant creationTimestamp;
-   private Instant lastRewardTimestamp;
+   private Instant lastUpdateTimestamp;
    private ConcurrentLinkedQueue<String> rewinList;
    private int numIterations;
 
@@ -25,12 +25,12 @@ public class Post {
       this.content = content;
       this.author = author;
       creationTimestamp = Instant.now();
+      lastUpdateTimestamp = Instant.now();
       commentsList = new ConcurrentLinkedQueue<>();
       likersList = new LinkedHashMap<>();
       dislikersList = new LinkedHashMap<>();
       rewinList = new ConcurrentLinkedQueue<>();
       numIterations = 0;
-      lastRewardTimestamp = creationTimestamp;
 
    }
 
@@ -106,12 +106,12 @@ public class Post {
       this.creationTimestamp = creationTimestamp;
    }
 
-   public Instant getLastRewardTimestamp() {
-      return this.lastRewardTimestamp;
+   public Instant getLastUpdateTimestamp() {
+      return this.lastUpdateTimestamp;
    }
 
-   public void setLastRewardTimestamp(Instant lastUpdateTimestamp) {
-      this.lastRewardTimestamp = lastUpdateTimestamp;
+   public void setLastUpdateTimestamp(Instant lastUpdateTimestamp) {
+      this.lastUpdateTimestamp = lastUpdateTimestamp;
    }
 
    public ConcurrentLinkedQueue<String> getRewinList() {

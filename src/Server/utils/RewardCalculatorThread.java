@@ -1,4 +1,4 @@
-package Server;
+package Server.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,48 +11,59 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import Server.ServerManager;
 import Server.Configs.ServerSettings;
-import Server.utils.Comment;
-import Server.utils.Post;
-import Server.utils.ServerUtils;
-import Server.utils.User;
 
 public class RewardCalculatorThread implements Runnable {
 
    private final ConcurrentHashMap<Integer, Post> postDB;
    private Instant currentDate;
-   private Instant lastDate = null;
+   private Instant lastDate;
    private double reward;
 
    public RewardCalculatorThread(ConcurrentHashMap<Integer, Post> postDB) {
       this.postDB = postDB;
    }
 
-   public void run() {
-      synchronized (postDB) {
-         System.out.println("Calcolo dei rewards in corso..."); //TODO Il postDB sembra sempre vuoto e non si capisce perchè
+   public void run() { 
+      try{
+      synchronized (postDB) {      
+         System.out.println("Calcolo dei rewards in corso...");
          if (postDB.isEmpty())
             return;
          Iterator<Entry<Integer, Post>> it = postDB.entrySet().iterator();
          while (it.hasNext()) {
-            Post p = (Post) it.next();
-            if (isBetweenDates(p.getLastRewardTimestamp())) {
-               HashSet<String> personAnalyzed = analyze(p);
+            Post p = it.next().getValue();
+            if (isBetweenDates(p.getLastUpdateTimestamp())) {
+               HashSet<String> personAnalyzed = analyze(p); //analizza il post per ottenere chi ha interagito con esso, per ottenere i rewards
                p.increaseIterations();
                double authorReward = round((reward * ServerSettings.authorPercentage) / 100, 1);
-               ServerManager.findUserByUsername(p.getAuthor()).addToWincoinList(reward);
-               double othersReward = round((reward - authorReward) / personAnalyzed.size(), 1);
-               for (String username : personAnalyzed) {
-                  ServerManager.findUserByUsername(username).addToWincoinList(othersReward);
+               if (authorReward > 0)
+                  ServerManager.findUserByUsername(p.getAuthor()).addToWincoinList(reward);
+               if (personAnalyzed.size() > 0) {
+                  double othersReward = round((reward - authorReward) / personAnalyzed.size(), 1);
+                  for (String username : personAnalyzed) {
+                     User u = ServerManager.findUserByUsername(username);
+                     u.addToWincoinList(othersReward);
+               
+               }
                }
             }
-               ServerUtils.sendUDPMessage("Rewards Calcolati!");
          }
       }
+      ServerUtils.sendUDPMessage("Rewards Calcolati!");
+      lastDate = Instant.now();
+   }
+   catch (Exception e) {
+      e.printStackTrace();
+   }
    }
 
    private boolean isBetweenDates(Instant date) {
-      return (Duration.between(lastDate, date).toNanos() >= 0 && Duration.between(date, currentDate).toNanos() >= 0);
+      currentDate = Instant.now();
+      if (lastDate == null)
+         return true;
+      return (Duration.between(lastDate, date).toNanos() >= 0 && Duration.between(date, currentDate).toNanos() >= 0); //Se date è maggiore o uguale a lastDate e minore o uguale a currentDate
    }
 
    private HashSet<String> analyze(Post p) {

@@ -295,7 +295,6 @@ public class ServerManager {
       if (u == null)
          throw new NullPointerException();
       callbacksMap.putIfAbsent(u, service);
-      // callbacksMap.put(username, service);
 
    }
 
@@ -304,4 +303,10 @@ public class ServerManager {
          throw new NullPointerException();
       callbacksMap.remove(username, service);
    }
+
+   public static void saveServerState() {
+      database.saveDatabaseToFile();
+   }
+  
+
 }

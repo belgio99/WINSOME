@@ -20,3 +20,5 @@ SOCKTIMEOUT = -1
 STORAGEPATH = /tmp
 # Intervallo di calcolo dei reward (numero intero e unità di tempo in secondi (s), minuti (m), ore (h), giorni (d))
 REWARDINTERVAL = 30s
+# Intervallo di tempo di autosalvataggio dei dati (numero intero e unità di tempo in secondi (s), minuti (m), ore (h), giorni (d))
+AUTOSAVE = 30s

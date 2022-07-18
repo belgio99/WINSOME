@@ -23,6 +23,8 @@ public class ServerSettings {
    public static String rewardDelayTime;
    public static float authorPercentage;
 
+   public static String autoSaveTime;
+
    
    static {
       String path = "src/Server/Configs/serverConfig.txt";
@@ -49,7 +51,9 @@ public class ServerSettings {
          socketTimeout = Integer.parseInt(String.valueOf(settings.getOrDefault("SOCKETTIMEOUT", -1)));
         
          storagePath = (String) settings.getOrDefault("STORAGEPATH", "/tmp");
-         rewardDelayTime = (String) settings.getOrDefault("REWARDINTERVAL", -1);         
+         rewardDelayTime = (String) settings.getOrDefault("REWARDINTERVAL", -1);       
+         
+         autoSaveTime = (String) settings.getOrDefault("AUTOSAVE", "30s");
       }
          else {
             System.out.println("File di configurazione non trovato, uso valori di default");
@@ -82,6 +86,7 @@ public class ServerSettings {
       socketTimeout = -1;
       storagePath = "/tmp";
       rewardDelayTime = "30s";
+      autoSaveTime = "30s";
    }
 
    private static int checkValidPort(int port, int defaultValue) {
