@@ -10,13 +10,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class User {
-   private String username;
-   private String password;
-   private LinkedList<String> tags;
-   private ConcurrentLinkedQueue<String> following;
-   private ConcurrentLinkedQueue<String> followers;
-   private LinkedBlockingQueue<Transaction> wincoinList;
-   private LinkedList<Integer> userPostList;
+   private final String username;
+   private final String password;
+   private final LinkedList<String> tags;
+   private final ConcurrentLinkedQueue<String> following;
+   private final ConcurrentLinkedQueue<String> followers;
+   private final LinkedBlockingQueue<Transaction> wincoinList;
+   private final LinkedList<Integer> userPostList;
    private double currentCompensation;
 
    public User(String username, String password, LinkedList<String> tags) {

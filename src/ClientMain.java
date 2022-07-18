@@ -102,7 +102,7 @@ public class ClientMain {
                                 username = split[1];
                                 remote.registerForCallback(username, stub);
                             } else {
-                                System.out.println("< Login fallito!"); // Ricevo la stringa con il messaggio di errore
+                                System.out.println("< Login fallito!");
                             }
                             break;
                         default:

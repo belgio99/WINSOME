@@ -85,14 +85,14 @@ public class ServerMain {
                   clientChannel.register(selector, SelectionKey.OP_READ);
                   System.out.println("Nuovo client connesso a " + clientChannel.getRemoteAddress().toString());
                   ServerUtils.sendString(clientChannel, ServerSettings.RMIAddress + ";" + ServerSettings.RMIPort + ";"
-                  + ServerSettings.RMIName);
+                  + ServerSettings.RMIName); //invio i dettagli RMI del server al client
                   ServerUtils.sendString(clientChannel,
-                        ServerSettings.multicastAddress + ":" + ServerSettings.multicastPort);
+                        ServerSettings.multicastAddress + ":" + ServerSettings.multicastPort); //invio i dettagli multicast del server al client
                } else if (key.isReadable()) {
                   SocketChannel clientChannel = (SocketChannel) key.channel();
-                  ServerRequestHandler request = new ServerRequestHandler(clientChannel, selector, registerQueue);
+                  ServerRequestHandler request = new ServerRequestHandler(clientChannel, selector, registerQueue); //creo una nuova istanza di ServerRequestHandler per gestire la richiesta del client
                   key.cancel();
-                  threadPool.submit(new Thread(request));
+                  threadPool.submit(new Thread(request)); //invio la richiesta al thread pool
                }
                selectedKS.remove(key);
             }

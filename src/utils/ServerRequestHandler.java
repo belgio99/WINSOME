@@ -28,8 +28,6 @@ public class ServerRequestHandler implements Runnable {
    private final ConcurrentLinkedQueue<SocketChannel> registerQueue;
    static int columnSize = 15;
 
-   // private final Selector selector = ServerManager.getSelector();
-
    public ServerRequestHandler(SocketChannel clientChannel, Selector selector,
          ConcurrentLinkedQueue<SocketChannel> registerQueue) {
       this.clientChannel = clientChannel;
@@ -53,18 +51,18 @@ public class ServerRequestHandler implements Runnable {
       String response = "";
       String[] requestSplit;
       try {
-         String clientRequest = receiveRequest();
-         requestSplit = clientRequest.trim().split(" ");
-         if (requestSplit.length < 1 || requestSplit[0].trim().isEmpty()) {
+         String clientRequest = receiveRequest(); // ricevo la richiesta del client
+         requestSplit = clientRequest.trim().split(" "); // splitto la richiesta del client in base al carattere di spazio
+         if (requestSplit.length < 1 || requestSplit[0].trim().isEmpty()) { // se la richiesta è vuota o contiene solo spazi
             response = "L'input non è corretto!";
             sendString(clientChannel, response);
-            registerKey();
+            registerKey(); // registro la chiave del client nel selector
             return;
          }
          requestSplit[0] = requestSplit[0].trim();
          if (requestSplit[0].equals("login")) {
             if (requestSplit.length != 3 || requestSplit[1].trim().isEmpty()
-                  || requestSplit[2].trim().isEmpty()) {
+                  || requestSplit[2].trim().isEmpty()) { 
                sendString(clientChannel, "L'input non è corretto!");
                registerKey();
                return;
@@ -80,18 +78,14 @@ public class ServerRequestHandler implements Runnable {
             registerKey();
             return;
          }
-         // else sendInt(clientChannel, OK.getCode());
-         // Fino a qua l'utente è loggato e la stringa 0 è checked, ma le stringhe dalla
-         // 0 in poi sono unchecked
-         // Controllo anche la stringa 1 perché serve per alcuni comandi
-         switch (requestSplit[0]) {
+         switch (requestSplit[0]) { // controllo la prima parte della richiesta
             case "help":
                response = printHelp();
             case "logout":
                response = logout();
                break;
             case "list":
-               if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty()) {
+               if (requestSplit.length < 2 || requestSplit[1].trim().isEmpty()) { // se la richiesta è vuota o contiene solo spazi
                   response = "L'input non è corretto!";
                } else
                   switch (requestSplit[1]) {
@@ -105,7 +99,7 @@ public class ServerRequestHandler implements Runnable {
                         response = listFollowers(u);
                         break;
                      default:
-                        response = "Operazione non valida!";
+                        response = "Operazione non valida!"; 
                         break;
                   }
                break;
@@ -163,8 +157,8 @@ public class ServerRequestHandler implements Runnable {
                response = "L'input non è corretto!";
                break;
          }
-         sendString(clientChannel, response);
-         registerKey();
+         sendString(clientChannel, response); // invio la risposta al client
+         registerKey(); // registro la chiave del client nel selector
       } catch (IOException e) {
          System.out.println("Un client si è disconnesso!");
          ServerManager.logout(clientChannel);
@@ -173,8 +167,8 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private void registerKey() {
-      registerQueue.add(clientChannel);
-      selector.wakeup();
+      registerQueue.add(clientChannel); // Aggiungo il client alla coda di registrazione
+      selector.wakeup(); // Risveglio il selector per far partire la registrazione
    }
 
    private String login(String[] split) {
@@ -184,13 +178,7 @@ public class ServerRequestHandler implements Runnable {
       String password = split[2];
       User u = ServerManager.login(username, password, clientChannel);
       if (u == null) {
-         StringBuilder msg = new StringBuilder();
-         msg.append("Errore in fase di login! Le cause possono essere:\n")
-               .append("< - Account non registrato\n")
-               .append("< - Password non corretta\n")
-               .append("< - Si sta provando ad accedere ad un altro account senza prima essersi sloggati\n")
-               .append("< - Si sta tentando di accedere, ma si è già loggati");
-         return msg.toString();
+         return "Errore!";
       } else
          return "Operazione completata";
    }
@@ -397,6 +385,7 @@ public class ServerRequestHandler implements Runnable {
    private String listUsers(User u) throws IOException {
       HashMap<String, LinkedList<String>> usersWithCommonTag = ServerManager.listUsers(u);
       StringBuilder msg = new StringBuilder();
+      // creazione della tabella da restituire al client
       msg.append("Utente");
       for (int i = 0; i < columnSize - 6; i++)
          msg.append(" ");
@@ -425,6 +414,7 @@ public class ServerRequestHandler implements Runnable {
    private String listFollowing(User u) throws IOException {
       HashMap<String, LinkedList<String>> usersWithCommonTag = ServerManager.listFollowing(u);
       StringBuilder msg = new StringBuilder();
+      // creazione della tabella da restituire al client
       msg.append("Utente");
       for (int i = 0; i < columnSize - 6; i++)
          msg.append(" ");
@@ -436,7 +426,7 @@ public class ServerRequestHandler implements Runnable {
       msg.append("\n");
       for (Map.Entry<String, LinkedList<String>> entry : usersWithCommonTag.entrySet()) {
          msg.append("< ");
-         msg.append(entry.getKey().substring(0, Math.min(entry.getKey().length(), columnSize - 1)));
+         msg.append(entry.getKey().substring(0, Math.min(entry.getKey().length(), columnSize - 1))); //uso math.min perchè se la stringa è troppo lunga la taglio, ma senza che lanci l'eccezione se non è troppo lunga
          for (int i = 0; i < columnSize - entry.getKey().length(); i++)
             msg.append(" ");
          msg.append("|");
@@ -509,6 +499,7 @@ public class ServerRequestHandler implements Runnable {
          for (int j = 0; j < columnSize - currentPost.getAuthor().length(); j++)
             msg.append(" ");
          msg.append("|" + currentPost.getTitle().toString());
+         msg.append("\n");
       }
       return msg.toString();
    }
