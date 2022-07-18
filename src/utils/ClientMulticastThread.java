@@ -4,7 +4,7 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 
 public class ClientMulticastThread implements Runnable {
-   private MulticastSocket multicastSocket;
+   private final MulticastSocket multicastSocket;
 
    public ClientMulticastThread(MulticastSocket multicastSocket) {
       this.multicastSocket = multicastSocket;
@@ -37,9 +37,6 @@ public class ClientMulticastThread implements Runnable {
 
    }
 
-  /*public void close() {
-      multicastSocket.close();
-  }*/
 
 
 }

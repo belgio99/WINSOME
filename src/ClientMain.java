@@ -151,7 +151,7 @@ public class ClientMain {
     }
 
     private static void register(String input) throws Exception {
-        String splitInput[] = input.split(" ");
+        String[] splitInput = input.split(" ");
         String regUsername = splitInput[1].trim().toLowerCase();
         String password = splitInput[2].trim();
         LinkedList<String> tagsList = new LinkedList<>();

@@ -42,7 +42,7 @@ public class RewardCalculatorThread implements Runnable {
                double authorReward = round((reward * ServerSettings.authorPercentage) / 100, 1);
                if (authorReward > 0)
                   ServerManager.findUserByUsername(p.getAuthor()).addToWincoinList(reward);
-                  if (likers.size()>0) {
+               if (likers.size()>0) {
                   double othersReward = round((reward - authorReward) / likers.size(), 1);
                   for (String username : likers) {
                      User u = ServerManager.findUserByUsername(username);

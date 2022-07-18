@@ -107,48 +107,26 @@ public class User {
       return this.username;
    }
 
-   public void setUsername(String username) {
-      this.username = username;
-   }
-
    public String getPassword() {
       return this.password;
-   }
-
-   public void setPassword(String password) {
-      this.password = password;
    }
 
    public LinkedList<String> getTags() {
       return this.tags;
    }
 
-   public void setTags(LinkedList<String> tags) {
-      this.tags = tags;
-   }
-
    public ConcurrentLinkedQueue<String> getFollowing() {
       return this.following;
    }
 
-   public void setFollowing(ConcurrentLinkedQueue<String> following) {
-      this.following = following;
-   }
 
    public ConcurrentLinkedQueue<String> getFollowers() {
       return this.followers;
    }
 
-   public void setFollowers(ConcurrentLinkedQueue<String> followers) {
-      this.followers = followers;
-   }
 
    public LinkedBlockingQueue<Transaction> getWincoinList() {
       return this.wincoinList;
-   }
-
-   public void setWincoinList(LinkedBlockingQueue<Transaction> wincoinList) {
-      this.wincoinList = wincoinList;
    }
 
    public LinkedList<Integer> getUserPostList() {

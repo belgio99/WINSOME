@@ -31,7 +31,6 @@ public class Database {
       userDB = new ConcurrentHashMap<>();
       gson = new GsonBuilder().setPrettyPrinting().create();
       loadDatabaseFromFile();
-
    }
 
    public void loadDatabaseFromFile() {
