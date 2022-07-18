@@ -1,0 +1,24 @@
+# Indirizzo IP del server (IP o hostname)
+SERVER = localhost
+# Porta del server (0-65535)
+TCPPORT = 50000
+# Indirizzo IP di multicast (IP o hostname)
+MCASTADDR = 239.255.32.32
+# Porta di multicast (0-65535)
+MCASTPORT = 50000
+# Indirizzo IP RMI (IP o hostname)
+RMIADDR = localhost
+# Porta RMI (0-65535)
+RMIPORT = 50001
+# Nome RMI (stringa)
+RMINAME = Winsome
+# Percentuale destinata all'autore (0-100)
+AUTHORPERCENT = 50
+# Tempo di timeout del socket (secondi)
+SOCKTIMEOUT = -1
+# Cartella di storage dei file (stringa)
+STORAGEPATH = /tmp
+# Intervallo di calcolo dei reward (numero intero e unità di tempo in secondi (s), minuti (m), ore (h), giorni (d))
+REWARDINTERVAL = 30s
+# Intervallo di tempo di autosalvataggio dei dati (numero intero e unità di tempo in secondi (s), minuti (m), ore (h), giorni (d))
+AUTOSAVE = 1m
