@@ -134,13 +134,12 @@ public class RewardCalculatorThread implements Runnable {
          if (!isBetweenDates(c.getTimestamp()))
             break;
 
-         User author = c.getAuthor();
-         set.add(author.getUsername());
-         if (map.containsKey(author.getUsername())) {
-            int value = map.get(author.getUsername());
-            map.replace(author.getUsername(), value + 1);
+         String author = c.getAuthor();
+         if (map.containsKey(author)) {
+            int value = map.get(author);
+            map.replace(author, value + 1);
          } else
-            map.put(author.getUsername(), 1);
+            map.put(author, 1);
       }
       return map;
    }

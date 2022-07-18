@@ -472,7 +472,7 @@ public class ServerRequestHandler implements Runnable {
       while (itr.hasNext()) {
          Comment curr = itr.next();
          msg.append(
-               "<      " + curr.getAuthor().getUsername().toString() + ": \"" + curr.getContent().toString() + "\" \n");
+               "<      " + curr.getAuthor() + ": \"" + curr.getContent().toString() + "\" \n");
       }
       return msg.toString();
    }

@@ -3,22 +3,14 @@ package winsome.datastructures;
 import java.time.Instant;
 
 public class Comment {
-   private User author;
+   private String author;
    private String content;
    private Instant timestamp;
 
-   public Comment(User author, String content) {
+   public Comment(String author, String content) {
       this.author = author;
       this.content = content;
       timestamp = Instant.now();
-   }
-
-   public User getAutore() {
-      return this.author;
-   }
-
-   public void setAutore(User autore) {
-      this.author = autore;
    }
 
    public String getContenuto() {
@@ -37,11 +29,11 @@ public class Comment {
       this.timestamp = timestamp;
    }
 
-   public User getAuthor() {
+   public String getAuthor() {
       return this.author;
    }
 
-   public void setAuthor(User author) {
+   public void setAuthor(String author) {
       this.author = author;
    }
 

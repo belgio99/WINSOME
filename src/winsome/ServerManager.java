@@ -178,7 +178,7 @@ public class ServerManager {
    public static int addComment(User u, Post post, String content) {
       if (post == null)
          return -1;
-      Comment comment = new Comment(u, content);
+      Comment comment = new Comment(u.getUsername(), content);
       post.getCommentsList().add(comment);
       analyzeList.add(post);
       return 0;
