@@ -16,7 +16,8 @@
          "name": "Client",
          "request": "launch",
          "mainClass": "${workspaceFolder}/src/ClientMain.java",
-         "projectName": "WINSOME_bcd4babe"
+         "projectName": "WINSOME_bcd4babe",
+         "vmArgs": "-Djava.net.preferIPv4Stack=true"
       }
    ],
    "compounds": [
