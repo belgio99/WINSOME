@@ -24,7 +24,7 @@ public class Database {
    private ConcurrentHashMap<String, LinkedList<String>> globalTagsMap;
    private final Gson gson;
 
-   public Database() {
+   public Database() { //TODO: mettere l'autosalvataggio solo se db modificato
       postDB = new ConcurrentHashMap<>();
       globalTagsMap = new ConcurrentHashMap<>();
       userDB = new ConcurrentHashMap<>();
@@ -101,17 +101,17 @@ public class Database {
       User newUser = new User(username, password, tagsList);
       Iterator<String> itr = tagsList.iterator();
       while (itr.hasNext()) {
-         String newTag = itr.next();
+         String newTag = itr.next().toLowerCase();
          globalTagsMap.putIfAbsent(newTag, new LinkedList<String>());
          globalTagsMap.get(newTag).add(newUser.getUsername());
       }
       return userDB.putIfAbsent(username, newUser) == null ? true : false;
    }
 
-   public boolean addPost(User author, Post post) throws NullPointerException {
+   public boolean addPost(User u, Post post) throws NullPointerException {
       if (postDB.putIfAbsent(post.getId(), post) != null)
-         return false; //returna false in caso si tratti di un rewin
-      author.addToUserPostList((post.getId()));
+         return false;
+      u.addToUserPostList((post.getId()));
       return true;
    }
 
@@ -130,7 +130,7 @@ public class Database {
       return postDB.get(ID);
    }
 
-   public LinkedList<Post> getUserPosts(User u) throws NullPointerException {
+   public LinkedList<Post> getUserPosts(User u) throws NullPointerException { //Prende anche i post del rewin
       LinkedList<Post> posts = new LinkedList<>();
       for (Integer id : u.getUserPostList()) {
          posts.add(postDB.get(id));

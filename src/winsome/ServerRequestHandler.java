@@ -9,8 +9,10 @@ import java.nio.channels.SocketChannel;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import winsome.datastructures.Comment;
@@ -24,7 +26,7 @@ public class ServerRequestHandler implements Runnable {
    private final ByteBuffer buffer;
    private final Selector selector;
    private final ConcurrentLinkedQueue<SocketChannel> registerQueue;
-   static int columnSize = 20;
+   static int columnSize = 15;
 
    // private final Selector selector = ServerManager.getSelector();
 
@@ -93,10 +95,15 @@ public class ServerRequestHandler implements Runnable {
                   response = "L'input non è corretto!";
                } else
                   switch (requestSplit[1]) {
-                     case "user":
+                     case "users":
                         response = listUsers(u);
+                        break;
                      case "following":
                         response = listFollowing(u);
+                        break;
+                     case "followers":
+                        response = listFollowers(u);
+                        break;
                      default:
                         response = "Operazione non valida!";
                         break;
@@ -235,6 +242,8 @@ public class ServerRequestHandler implements Runnable {
             return "Operazione completata";
          case -1:
             return "Utente non trovato!";
+         case -2:
+            return "Non si può seguire se stessi!";
          default:
             return "Errore sconosciuto!";
       }
@@ -320,6 +329,8 @@ public class ServerRequestHandler implements Runnable {
       Post post = ServerManager.getPostByID(postID);
       if (post == null)
          return "Post non trovato!";
+      if (post.getAuthor().equals(u.getUsername()))
+         return "Non si può fare il rewin di un proprio post!";
       switch (ServerManager.rewinPost(u, post)) {
          case 0:
             return "Operazione completata";
@@ -386,25 +397,85 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String listUsers(User u) throws IOException {
+      HashMap<String, LinkedList<String>> usersWithCommonTag = ServerManager.listUsers(u);
       StringBuilder msg = new StringBuilder();
-      HashSet<String> users = ServerManager.listUsers(u);
-      Iterator<String> itr1 = users.iterator();
-      while (itr1.hasNext()) {
-         msg.append(itr1.next());
-         if (itr1.hasNext())
-            msg.append("\n");
+      msg.append("Utente");
+      for (int i = 0; i < columnSize - 6; i++)
+         msg.append(" ");
+      msg.append("|");
+      msg.append("Tag");
+      msg.append("\n");
+      for (int i = 0; i < columnSize * 3; i++)
+         msg.append("-");
+      msg.append("\n");
+      for (Map.Entry<String, LinkedList<String>> entry : usersWithCommonTag.entrySet()) {
+         msg.append("< ");
+         msg.append(entry.getKey().substring(0, Math.min(entry.getKey().length(), columnSize - 1)));
+         for (int i = 0; i < columnSize - entry.getKey().length(); i++)
+            msg.append(" ");
+         msg.append("|");
+         for (String tag : entry.getValue()) {
+            msg.append(tag);
+            if (!tag.equals(entry.getValue().getLast()))
+               msg.append(", ");
+         }
+         msg.append("\n");
       }
       return msg.toString();
    }
 
    private String listFollowing(User u) throws IOException {
+      HashMap<String, LinkedList<String>> usersWithCommonTag = ServerManager.listFollowing(u);
       StringBuilder msg = new StringBuilder();
-      HashSet<String> users = ServerManager.listFollowing(u);
-      Iterator<String> itr1 = users.iterator();
-      while (itr1.hasNext()) {
-         msg.append(itr1.next());
-         if (itr1.hasNext())
-            msg.append("\n");
+      msg.append("Utente");
+      for (int i = 0; i < columnSize - 6; i++)
+         msg.append(" ");
+      msg.append("|");
+      msg.append("Tag");
+      msg.append("\n");
+      for (int i = 0; i < columnSize * 3; i++)
+         msg.append("-");
+      msg.append("\n");
+      for (Map.Entry<String, LinkedList<String>> entry : usersWithCommonTag.entrySet()) {
+         msg.append("< ");
+         msg.append(entry.getKey().substring(0, Math.min(entry.getKey().length(), columnSize - 1)));
+         for (int i = 0; i < columnSize - entry.getKey().length(); i++)
+            msg.append(" ");
+         msg.append("|");
+         for (String tag : entry.getValue()) {
+            msg.append(tag);
+            if (!tag.equals(entry.getValue().getLast()))
+               msg.append(", ");
+         }
+         msg.append("\n");
+      }
+      return msg.toString();
+   }
+   
+   public String listFollowers(User u) throws IOException {
+      HashMap<String, LinkedList<String>> usersWithCommonTag = ServerManager.listFollowers(u);
+      StringBuilder msg = new StringBuilder();
+      msg.append("Utente");
+      for (int i = 0; i < columnSize - 6; i++)
+         msg.append(" ");
+      msg.append("|");
+      msg.append("Tag");
+      msg.append("\n");
+      for (int i = 0; i < columnSize * 3; i++)
+         msg.append("-");
+      msg.append("\n");
+      for (Map.Entry<String, LinkedList<String>> entry : usersWithCommonTag.entrySet()) {
+         msg.append("< ");
+         msg.append(entry.getKey().substring(0, Math.min(entry.getKey().length(), columnSize - 1)));
+         for (int i = 0; i < columnSize - entry.getKey().length(); i++)
+            msg.append(" ");
+         msg.append("|");
+         for (String tag : entry.getValue()) {
+            msg.append(tag);
+            if (!tag.equals(entry.getValue().getLast()))
+               msg.append(", ");
+         }
+         msg.append("\n");
       }
       return msg.toString();
    }
@@ -413,7 +484,7 @@ public class ServerRequestHandler implements Runnable {
       int numPostsToShow = 10;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.showFeed(u).iterator();
-      msg.append("< ID");
+      msg.append("ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");
       msg.append("Autore");

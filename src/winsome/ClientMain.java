@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -49,16 +50,25 @@ public class ClientMain {
             System.err.println("Errore nella connessione al server!");
             System.exit(1);
         }
-        String mcastInfoString = receiveString(); // ricevo dal server la stringa di configurazione del multicast
-        String[] mcastInfo = mcastInfoString.split(":");
+        System.setProperty("java.net.preferIPv4Stack" , "true"); // imposta lo stack IPv4 come preferito (necessario su Mac OS). Potrebbe non essere applicato su determinati sistemi operativi, e potrebbe richiedere il flag manuale
+        Thread multicastThread = null;
+        try {
+            String mcastInfoString = receiveString(); // ricevo dal server la stringa di configurazione del multicast
+            String[] mcastInfo = mcastInfoString.split(":");
         MulticastSocket multicastSocket = new MulticastSocket(Integer.parseInt(mcastInfo[1]));
         InetAddress mcastAddr = InetAddress.getByName(mcastInfo[0]);
         multicastSocket.setSoTimeout(0);
         multicastSocket.setReuseAddress(true);
         multicastSocket.joinGroup(mcastAddr);
-        Thread multicastThread = new Thread(new ClientMulticastThread(multicastSocket));
+        multicastThread = new Thread(new ClientMulticastThread(multicastSocket));
         multicastThread.setDaemon(true);
         multicastThread.start();
+        }
+        catch (SocketException e) {
+                System.err.println("Errore nell'avvio del thread relativo al multicast!");
+                System.err.println("Ci sono degli OS (es. Mac OS) che necessitano che la JVM sia avviata con il flag -Djava.net.preferIPv4Stack=true");
+                System.err.println("Riavviare il programma con questo flag per disporre delle funzioni di notifica multicast");
+            }
         followersList = new LinkedList<>();
         service = new NotifyClient(followersList);
         stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
@@ -104,6 +114,12 @@ public class ClientMain {
                         case "logout":
                             logout();
                             break;
+                            case "login":
+                            System.out.println("Operazione non consentita al momento! Eseguire prima il logout!");
+                            break;
+                        case "register":
+                            register(input);
+                            break;
                         default:
                             send(input);
                             System.out.println("< " + receiveString());
@@ -128,7 +144,8 @@ public class ClientMain {
         }
         scanner.close();
         clientSocketChannel.close();
-        multicastThread.interrupt();
+        if (multicastThread != null)
+            multicastThread.interrupt();
         System.exit(0);
     }
 

@@ -12,7 +12,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,13 +24,10 @@ import winsome.datastructures.Post;
 import winsome.datastructures.User;
 import winsome.utils.Scheduler;
 
-public class ServerManager {
-   // private static final Gson gson = new Gson();
-   //private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
+public class ServerManager { //TODO: verificare ogni richiesta
    private static final Database database = new Database();
-   private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>(); //mappa degli utenti registrati alle callbacks
-
    private static Selector selector;
+   private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>(); //mappa degli utenti registrati alle callbacks
    private static final ConcurrentHashMap<SocketChannel, User> usersLogged = new ConcurrentHashMap<>();
    private static ConcurrentLinkedQueue<Post> analyzeList = new ConcurrentLinkedQueue<>();
    private static Scheduler r1;
@@ -105,8 +102,10 @@ public class ServerManager {
    public synchronized static int deletePost(Post post) {
       try {
          database.deletePost(post);
+         analyzeList.remove(post);
          return 0;
       } catch (Exception e) {
+         e.printStackTrace();
          return -1;
       }
 
@@ -135,11 +134,15 @@ public class ServerManager {
    }
 
    public synchronized static int followUser(User u, String usernameToFollow) {
+      if (u == null || usernameToFollow == null)
+         return -1;
+      if (u.getUsername().equals(usernameToFollow))
+         return -2;
       User userToFollow = database.findUserByUsername(usernameToFollow);
       if (userToFollow == null)
          return -1;
-      u.getFollowing().add(userToFollow);
-      userToFollow.getFollowers().add(u);
+      u.getFollowing().add(userToFollow.getUsername());
+      userToFollow.getFollowers().add(u.getUsername());
       CallbackService service = callbacksMap.get(userToFollow);
       if (service != null) {
          try {
@@ -152,10 +155,12 @@ public class ServerManager {
    }
 
    public synchronized static int unfollowUser(User u, String usernameToUnfollow) {
+      if (u == null || usernameToUnfollow == null)
+         return -1;
       User userToUnfollow = database.findUserByUsername(usernameToUnfollow);
       if (userToUnfollow == null)
          return -1;
-      if (u.getFollowing().remove(userToUnfollow) && userToUnfollow.getFollowers().remove(u)) {
+      if (u.getFollowing().remove(userToUnfollow.getUsername()) && userToUnfollow.getFollowers().remove(u.getUsername())) {
          CallbackService service = callbacksMap.get(userToUnfollow);
          if (service != null) {
             try {
@@ -187,7 +192,7 @@ public class ServerManager {
    public static int rewinPost(User u, Post post) {
       if (post == null)
          return -1;
-      database.addPost(u, post);
+      u.addToUserPostList(post.getId());
       post.getRewinList().add(u.getUsername());
       return 0;
    }
@@ -246,33 +251,38 @@ public class ServerManager {
 
    }
 
-   public static HashSet<String> listUsers(User u) {
-      LinkedList<String> userTags = u.getTags();
-      HashSet<String> returnSet = new HashSet<>();
-      Iterator<String> itr1 = userTags.iterator();
-      while (itr1.hasNext()) {
-         LinkedList<String> userTagList = database.getUsersOfTag(itr1.next());
-         Iterator<String> itr2 = userTagList.iterator();
-         while (itr2.hasNext())
-            returnSet.add(itr2.next());
-      }
-      return returnSet;
-
+   public static HashMap<String,LinkedList<String>> listUsers(User u) {
+      HashMap<String,LinkedList<String>> returnMap = new HashMap<>();
+      for (String tag : u.getTags())
+         for (String username : database.getUsersOfTag(tag))
+            returnMap.put(username, database.findUserByUsername(username).getTags());
+      returnMap.remove(u.getUsername());
+      return returnMap;
    }
 
-   public static HashSet<String> listFollowing(User u) {
-      HashSet<String> returnSet = new HashSet<>();
-      Iterator<User> itr = u.getFollowing().iterator();
-      while (itr.hasNext()) {
-         returnSet.add(itr.next().getUsername());
-      }
-      return returnSet;
+   public static HashMap<String, LinkedList<String>> listFollowing(User u) {
+      HashMap<String, LinkedList<String>> returnMap = new HashMap<>();
+      for (String username : u.getFollowing())
+         returnMap.put(username, database.findUserByUsername(username).getTags());
+      return returnMap;
+   }
+   public static HashMap<String, LinkedList<String>> listFollowers(User u) {
+      HashMap<String, LinkedList<String>> returnMap = new HashMap<>();
+      for (String username : u.getFollowers())
+         returnMap.put(username, database.findUserByUsername(username).getTags());
+      return returnMap;
    }
 
    public static LinkedList<Post> showFeed(User u) {
       LinkedList<Post> feedList = new LinkedList<>();
-      for (User followingUser : u.getFollowing())
-         feedList.addAll(database.getUserPosts(followingUser));
+
+      for (String followingUser : u.getFollowing()) {
+         feedList.addAll(database.getUserPosts(database.findUserByUsername(followingUser)));
+         
+       
+         
+      //show even rewin posts
+      }
       Collections.shuffle(feedList);
       return feedList;
    }
@@ -288,11 +298,11 @@ public class ServerManager {
       User u = database.findUserByUsername(username);
       if (u == null)
          return null;
-      ConcurrentLinkedQueue<User> queue = u.getFollowers();
+      ConcurrentLinkedQueue<String> queue = u.getFollowers();
       LinkedList<String> returnList = new LinkedList<>();
-      Iterator<User> itr = queue.iterator();
+      Iterator<String> itr = queue.iterator();
       while (itr.hasNext()) {
-         returnList.add(itr.next().getUsername());
+         returnList.add(itr.next());
       }
       return returnList;
 

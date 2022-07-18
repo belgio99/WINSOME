@@ -38,8 +38,7 @@ public class RewardCalculatorThread implements Runnable {
          System.out.println("Calcolo dei rewards in corso...");
          while (!analyzeList.isEmpty()) {
             Post p = analyzeList.poll();
-            if (isBetweenDates(p.getLastUpdateTimestamp())) {
-               HashSet<String> personAnalyzed = analyze(p); //analizza il post per ottenere chi ha interagito con esso, per ottenere i rewards
+               HashSet<String> personAnalyzed = analyzePost(p); //analizza il post per ottenere chi ha interagito con esso, per ottenere i rewards
                double authorReward = round((reward * ServerSettings.authorPercentage) / 100, 1);
                if (authorReward > 0)
                   ServerManager.findUserByUsername(p.getAuthor()).addToWincoinList(reward);
@@ -51,7 +50,7 @@ public class RewardCalculatorThread implements Runnable {
                
                }
                }
-            }
+            
          }
       }
       synchronized (postDB) {
@@ -75,7 +74,7 @@ public class RewardCalculatorThread implements Runnable {
       return (Duration.between(lastDate, date).toNanos() >= 0); //Se date è maggiore o uguale a lastDate e minore o uguale a currentDate
    }
 
-   private HashSet<String> analyze(Post p) {
+   private HashSet<String> analyzePost(Post p) {
       HashSet<String> set = new HashSet<>(
             p.getCommentsList().size() + p.getLikersList().size() + p.getDislikersList().size()); // creo un set per
                                                                                                   // contenere tutti gli

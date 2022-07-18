@@ -42,8 +42,6 @@ public class ServerMain {
          Registry r1 = LocateRegistry.createRegistry(ServerSettings.RMIPort);
          r1.bind(ServerSettings.RMIName, regService);
 
-         //TODO Mettere il follow service
-
          Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                Selector selector = ServerManager.getSelector();

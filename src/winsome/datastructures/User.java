@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,10 +13,10 @@ public class User {
    private String username;
    private String password;
    private LinkedList<String> tags;
-   private ConcurrentLinkedQueue<User> following;
-   private ConcurrentLinkedQueue<User> followers;
+   private ConcurrentLinkedQueue<String> following;
+   private ConcurrentLinkedQueue<String> followers;
    private LinkedBlockingQueue<Transaction> wincoinList;
-   private ArrayList<Integer> userPostList;
+   private LinkedList<Integer> userPostList;
    private double currentCompensation;
 
    public User(String username, String password, LinkedList<String> tags) {
@@ -26,7 +26,7 @@ public class User {
       this.following = new ConcurrentLinkedQueue<>();
       this.followers = new ConcurrentLinkedQueue<>();
       this.wincoinList = new LinkedBlockingQueue<>();
-      this.userPostList = new ArrayList<>();
+      this.userPostList = new LinkedList<>();
       this.currentCompensation = 0;
 
    }
@@ -66,12 +66,12 @@ public class User {
       userPostList.add(postId);
    }
 
-   public void addToFollowing(User user) {
-      following.add(user);
+   public void addToFollowing(String username) {
+      following.add(username);
    }
 
-   public void addToFollowers(User user) {
-      followers.add(user);
+   public void addToFollowers(String username) {
+      followers.add(username);
    }
 
    public void addToCompensation(double compensation) {
@@ -86,19 +86,20 @@ public class User {
       return currentCompensation;
    }
 
-   public void removeFromWincoinList(double reward) {
-      wincoinList.remove(new Transaction(reward));
-   }
-
    public void removeFromUserPostList(int postId) {
-      userPostList.remove(postId);
+      Iterator<Integer> it = userPostList.iterator();
+      while (it.hasNext()) {
+         if (it.next() == postId) {
+            it.remove();
+         }
+      }
    }
 
-   public void removeFromFollowing(User user) {
+   public void removeFromFollowing(String user) {
       following.remove(user);
    }
 
-   public void removeFromFollowers(User user) {
+   public void removeFromFollowers(String user) {
       followers.remove(user);
    }
 
@@ -126,19 +127,19 @@ public class User {
       this.tags = tags;
    }
 
-   public ConcurrentLinkedQueue<User> getFollowing() {
+   public ConcurrentLinkedQueue<String> getFollowing() {
       return this.following;
    }
 
-   public void setFollowing(ConcurrentLinkedQueue<User> following) {
+   public void setFollowing(ConcurrentLinkedQueue<String> following) {
       this.following = following;
    }
 
-   public ConcurrentLinkedQueue<User> getFollowers() {
+   public ConcurrentLinkedQueue<String> getFollowers() {
       return this.followers;
    }
 
-   public void setFollowers(ConcurrentLinkedQueue<User> followers) {
+   public void setFollowers(ConcurrentLinkedQueue<String> followers) {
       this.followers = followers;
    }
 
@@ -150,7 +151,7 @@ public class User {
       this.wincoinList = wincoinList;
    }
 
-   public ArrayList<Integer> getUserPostList() {
+   public LinkedList<Integer> getUserPostList() {
       return this.userPostList;
    }
 
