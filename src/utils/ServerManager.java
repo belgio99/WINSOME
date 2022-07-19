@@ -314,12 +314,12 @@ public class ServerManager {
    public static LinkedList<String> receiveFollowersList(String username) {
       if (username == null)
          return null;
-      User u = database.findUserByUsername(username);
+      User u = database.findUserByUsername(username); // cerco l'utente
       if (u == null)
          return null;
-      ConcurrentLinkedQueue<String> queue = u.getFollowers(); 
+      ConcurrentLinkedQueue<String> queue = u.getFollowers(); // prendo la lista dei followers dell'utente
       LinkedList<String> returnList = new LinkedList<>();
-      returnList.addAll(queue);
+      returnList.addAll(queue); // copio la lista dei followers dell'utente in una linkedlist (per il client)
       return returnList;
 
    }

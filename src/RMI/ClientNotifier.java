@@ -6,11 +6,11 @@ import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class NotifyClient extends RemoteObject implements CallbackService {
+public class ClientNotifier extends RemoteObject implements CallbackService {
    private LinkedList<String> followers;
    private Lock lock;
 
-   public NotifyClient(LinkedList<String> followers) {
+   public ClientNotifier(LinkedList<String> followers) {
        this.followers = followers;
        lock = new ReentrantLock();
    }

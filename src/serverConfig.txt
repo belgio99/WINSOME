@@ -1,15 +1,15 @@
 # Indirizzo IP del server (IP o hostname)
 SERVER = localhost
-# Porta del server (0-65535)
+# Porta del server (1-65535)
 TCPPORT = 50000
 # Indirizzo IP di multicast (IP o hostname)
 MCASTADDR = 239.255.32.32
-# Porta di multicast (0-65535)
-MCASTPORT = 50000
+# Porta di multicast (1-65535)
+MCASTPORT = 50001
 # Indirizzo IP RMI (IP o hostname)
 RMIADDR = localhost
-# Porta RMI (0-65535)
-RMIPORT = 50001
+# Porta RMI (1-65535)
+RMIPORT = 50002
 # Nome RMI (stringa)
 RMINAME = Winsome
 # Percentuale destinata all'autore (0-100)

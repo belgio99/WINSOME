@@ -30,7 +30,7 @@ public class ServerUtils {
     }
 
     public static String[] fixArray(String clientRequest) {
-        String[] split = clientRequest.split("(?=\"[^\"].*\")");
+        String[] split = clientRequest.split("(?=\"[^\"].*\")"); //sistemo le stringhe che hanno le virgolette
         if (split.length == 1)
             split = clientRequest.split(" ");
         for (int i = 0; i < split.length; i++) {

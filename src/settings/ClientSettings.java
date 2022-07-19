@@ -8,7 +8,6 @@ public class ClientSettings {
 
    public static String serverAddress;
    public static int TCPPort;
-   public static int socketTimeout;
 
    static {
       String path = "bin/clientConfig.txt";
@@ -20,7 +19,6 @@ public class ClientSettings {
             serverAddress = (String) settings.getOrDefault("SERVER", "localhost");
             TCPPort = Integer.parseInt(String.valueOf(settings.getOrDefault("TCPPORT", 50000)));
             TCPPort = checkValidPort(TCPPort, 50000);
-            socketTimeout = Integer.parseInt(String.valueOf(settings.getOrDefault("SOCKETTIMEOUT", -1)));
 
             System.out.println("File di configurazione caricato");
          }
@@ -38,8 +36,6 @@ public class ClientSettings {
    public static void setDefaults() {
       serverAddress = "localhost";
       TCPPort = 50000;
-      socketTimeout = -1;
-
       return;
    }
 
@@ -48,8 +44,8 @@ public class ClientSettings {
          System.out.println("Numero di porta non valida, verrà usato il valore di default");
          return defaultValue;
       }
-      if (port == 8080)
-         System.out.println("Errore: la porta 8080 è riservata per l invio dei Post e delle transazioni");
-      return port == 8080 ? defaultValue : port;
+      return port;
+      }
    }
-}
+
+

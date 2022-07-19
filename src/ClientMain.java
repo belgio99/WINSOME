@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import RMI.CallbackService;
-import RMI.NotifyClient;
+import RMI.ClientNotifier;
 import RMI.ServerRemoteInterface;
 import settings.ClientSettings;
 import utils.ClientMulticastThread;
@@ -71,7 +71,7 @@ public class ClientMain {
                 System.err.println("Riavviare il programma con questo flag per disporre delle funzioni di notifica multicast");
             }
         followersList = new LinkedList<>();
-        service = new NotifyClient(followersList);
+        service = new ClientNotifier(followersList);
         stub = (CallbackService) UnicastRemoteObject.exportObject(service, 0);
         Scanner scanner = new Scanner(System.in);
         String input;
