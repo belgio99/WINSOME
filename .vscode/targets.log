@@ -7,7 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 
-# Make data base, printed on Tue Jul 19 00:11:03 2022
+# Make data base, printed on Tue Jul 19 12:14:27 2022
 
 # Variables
 
@@ -35,6 +35,8 @@ VSCODE_NLS_CONFIG = {"locale":"it","availableLanguages":{"*":"it"},"_languagePac
 _ = /usr/bin/make
 # makefile (from `makefile', line 1)
 MAKEFILE_LIST :=  makefile
+# makefile (from `makefile', line 19)
+.PHONY = clean reset
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
@@ -70,7 +72,7 @@ VSCODE_CODE_CACHE_PATH = /Users/belgio/Library/Application Support/Code/CachedDa
 # environment
 LOGNAME = belgio
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
@@ -89,6 +91,8 @@ MAKE_VERSION := 3.81
 USER = belgio
 # makefile
 .DEFAULT_GOAL := javac
+# makefile (from `makefile', line 5)
+JAVA_CP_WIN = "lib/*;bin;bin/*"
 # makefile (from `makefile', line 2)
 JC = javac
 # automatic
@@ -139,14 +143,14 @@ SUFFIXES :=
 JAVA_SRC_DIR = src
 # environment
 MAKELEVEL := 0
-# makefile (from `makefile', line 5)
+# makefile (from `makefile', line 6)
 STORAGE_DIR = /tmp
 # environment
 LANG = C
 # environment
 VSCODE_PID = 67194
 # variable set hash-table stats:
-# Load=67/1024=7%, Rehash=0, Collisions=1/90=1%
+# Load=69/1024=7%, Rehash=0, Collisions=1/92=1%
 
 # Pattern-specific Variable Values
 
@@ -173,11 +177,11 @@ all:
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
-cp:
+cp_sampledata:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 12):
+#  commands to execute (from `makefile', line 17):
 	cp $(JAVA_SRC_DIR)/sampledata/*.json $(STORAGE_DIR)
 	
 
@@ -190,7 +194,7 @@ cp:
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 23:49:37
+#  Last modified 2022-07-19 12:09:47
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -200,7 +204,7 @@ javac:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 8):
+#  commands to execute (from `makefile', line 9):
 	$(JC) -d $(JAVA_OUT_DIR) -cp $(JAVA_CP_DIR) $(JAVA_SRC_DIR)/*.java $(JAVA_SRC_DIR)/*/*.java
 	cp $(JAVA_SRC_DIR)/*.txt $(JAVA_OUT_DIR)
 	
@@ -211,25 +215,33 @@ javac:
 #  Modification time never checked.
 #  File has not been updated.
 
-java:
+reset:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 12):
-	cp $(JAVA_SRC_DIR)/sampledata/*.json $(STORAGE_DIR)
+#  commands to execute (from `makefile', line 25):
+	rm -rf $(STORAGE_DIR)/userdb.json $(STORAGE_DIR)/postdb.json $(STORAGE_DIR)/globaltagslist.json
 	
 
 clean:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 15):
+#  commands to execute (from `makefile', line 22):
 	rm -rf $(JAVA_OUT_DIR)
-	rm -rf $(STORAGE_DIR)
+	
+
+javac_win:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands to execute (from `makefile', line 13):
+	$(JC) -d $(JAVA_OUT_DIR) -cp $(JAVA_CP_WIN) $(JAVA_SRC_DIR)/*.java $(JAVA_SRC_DIR)/*/*.java
+	copy $(JAVA_SRC_DIR)/*.txt $(JAVA_OUT_DIR) /Y
 	
 
 # files hash-table stats:
-# Load=8/1024=1%, Rehash=0, Collisions=0/20=0%
+# Load=9/1024=1%, Rehash=0, Collisions=0/21=0%
 # VPATH Search Paths
 
 # No `vpath' search paths.
@@ -241,7 +253,7 @@ clean:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Tue Jul 19 00:11:03 2022
+# Finished Make data base on Tue Jul 19 12:14:27 2022
 
  
 make: *** No rule to make target `all'.  Stop.

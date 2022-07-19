@@ -21,6 +21,7 @@ public class ClientNotifier extends RemoteObject implements CallbackService {
            lock.lock();
            followers.add(username);
            System.out.println("Nuovo follower! " + username);
+           System.out.println("< ");
        } finally {
            lock.unlock();
        }
@@ -30,7 +31,8 @@ public class ClientNotifier extends RemoteObject implements CallbackService {
        try {
            lock.lock();
            followers.remove(username);
-           System.out.println("Unfollower! " + username);
+           System.out.println(username + " non ti sta più seguendo!");
+           System.out.println("< ");
        } finally {
            lock.unlock();
        }

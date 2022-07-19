@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import RMI.CallbackService;
 import datastructures.Comment;
@@ -30,6 +32,7 @@ public class ServerManager {
    private static final ConcurrentHashMap<User, SocketChannel> usersLogged = new ConcurrentHashMap<>();
    private static ConcurrentLinkedQueue<Post> analyzeQueue = new ConcurrentLinkedQueue<>();
    private static Scheduler r1;
+   private static Lock postLock = new ReentrantLock();
 
    static {
       r1 = new Scheduler(analyzeQueue, database.getPostDB());
@@ -99,8 +102,10 @@ public class ServerManager {
    public static Post createPost(String title, String content, User author) {
       if (author == null || title == null || content == null)
          return null;
+      postLock.lock();
       Post post = new Post(database.getPreviousMaxPostID() + 1, author.getUsername(), title, content); // creo il post
       database.addPost(author, post); // lo aggiungo al database
+      postLock.unlock();
       return post;
    }
 
@@ -278,7 +283,7 @@ public class ServerManager {
    public static HashMap<String, LinkedList<String>> listFollowing(User u) {
       if (u == null)
          return null;
-      HashMap<String, LinkedList<String>> returnMap = new HashMap<>(); // TODO mappa che contiene l'elenco degli utenti e i loro followings
+      HashMap<String, LinkedList<String>> returnMap = new HashMap<>(); 
       for (String username : u.getFollowing())
          returnMap.put(username, database.findUserByUsername(username).getTags());
       return returnMap;
@@ -286,7 +291,7 @@ public class ServerManager {
    public static HashMap<String, LinkedList<String>> listFollowers(User u) {
       if (u == null)
          return null;
-      HashMap<String, LinkedList<String>> returnMap = new HashMap<>(); // TODO mappa che contiene l'elenco degli utenti e i loro followers
+      HashMap<String, LinkedList<String>> returnMap = new HashMap<>(); 
       for (String username : u.getFollowers())
          returnMap.put(username, database.findUserByUsername(username).getTags());
       return returnMap;
@@ -332,14 +337,14 @@ public class ServerManager {
       User u = database.findUserByUsername(username);
       if (u == null)
          throw new NullPointerException();
-      callbacksMap.putIfAbsent(u, service); //TODO
+      callbacksMap.putIfAbsent(u, service); 
 
    }
 
    public static void unregisterForCallback(String username, CallbackService service) throws NullPointerException {
       if (username == null)
          throw new NullPointerException();
-      callbacksMap.remove(username, service); // rimuovo il servizio dalla mappa
+      callbacksMap.remove(database.findUserByUsername(username), service); // rimuovo il servizio dalla mappa
    }
 
    public static void saveServerState() {

@@ -45,7 +45,7 @@ public class ClientMain {
             System.err.println("Non ho trovato l'host a cui connettermi!");
             System.exit(1);
         } catch (IOException e) {
-            System.err.println("Errore di I/O! Chiusura...");
+            System.err.println("Errore di I/O! Controllare di aver avviato il Server! Chiusura...");
             System.exit(1);
         } catch (Exception e) {
             System.err.println("Errore nella connessione al server!");
@@ -116,10 +116,8 @@ public class ClientMain {
                             logout();
                             break;
                             case "login":
+                            case "register":
                             System.out.println("Operazione non consentita al momento! Eseguire prima il logout!");
-                            break;
-                        case "register":
-                            register(input);
                             break;
                         default:
                             send(input);

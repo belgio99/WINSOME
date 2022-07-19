@@ -152,9 +152,7 @@ public class Database {
    }
 
    public int getPreviousMaxPostID() {
-      synchronized (postDB) {
       return postDB.size();
-      }
    }
 
    public LinkedList<String> getUsersOfTag(String tag) throws NullPointerException {
