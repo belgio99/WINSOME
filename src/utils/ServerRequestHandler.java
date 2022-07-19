@@ -191,7 +191,7 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String createPost(User u, String clientRequest) throws IOException {
-      String[] split = fixArray(clientRequest);
+      String[] split = fixArray(clientRequest); // rimuovo gli spazi iniziali e finali, e gestisco le virgolette
       if (split.length != 3 || split[0].trim().isEmpty() || split[2].trim().isEmpty())
          return "L'input non è corretto!";
       String title = split[0];
@@ -275,7 +275,7 @@ public class ServerRequestHandler implements Runnable {
                .append(idAsString.substring(0, Math.min(idAsString.length(), columnSize - 1))); // con math.min evito
                                                                                                 // l'eccezione in caso
                                                                                                 // la stringa sia già
-                                                                                                // più corta, e non ha
+                                                                                                // più corta e non ha
                                                                                                 // bisogno di trimming
          for (int j = 0; j < columnSize - idAsString.length(); j++)
             msg.append(" ");

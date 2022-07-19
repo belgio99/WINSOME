@@ -27,7 +27,7 @@ public class ServerManager {
    private static final Database database = new Database();
    private static Selector selector;
    private static final ConcurrentHashMap<User, CallbackService> callbacksMap = new ConcurrentHashMap<>(); //mappa degli utenti registrati alle callbacks
-   private static final ConcurrentHashMap<SocketChannel, User> usersLogged = new ConcurrentHashMap<>();
+   private static final ConcurrentHashMap<User, SocketChannel> usersLogged = new ConcurrentHashMap<>();
    private static ConcurrentLinkedQueue<Post> analyzeQueue = new ConcurrentLinkedQueue<>();
    private static Scheduler r1;
 
@@ -76,8 +76,8 @@ public class ServerManager {
          return null;
       if (!User.hashEncrypt(password).equals(user.getPassword())) // se la password non è corretta
          return null;
-      if (usersLogged.get(clientChannel) == null) { // se l'utente non è già loggato
-         usersLogged.put(clientChannel, user); // lo loggo
+      if (usersLogged.get(user) == null) { // se l'utente non è già loggato
+         usersLogged.put(user, clientChannel); // lo loggo
          return user;
       } else
          return null;
@@ -86,13 +86,14 @@ public class ServerManager {
 
    public static int logout(SocketChannel clientChannel) {
       if (clientChannel == null)
-         return 0;
-      try {
-         return usersLogged.remove(clientChannel) == null ? -1 : 0; // se l'utente non è loggato, ritorna -1, altrimenti 0
-      } catch (NullPointerException e) {
          return -1;
+      for (User user : usersLogged.keySet()) {
+         if (usersLogged.get(user) == clientChannel) {
+            usersLogged.remove(user);
+            return 0;
+         }
       }
-
+      return -1;
    }
 
    public static Post createPost(String title, String content, User author) {
@@ -136,7 +137,11 @@ public class ServerManager {
    public static User getUserLogged(SocketChannel clientChannel) {
       if (clientChannel == null)
          return null;
-      return usersLogged.get(clientChannel); // cerco l'utente loggato
+      for (User user : usersLogged.keySet()) {
+         if (usersLogged.get(user) == clientChannel)
+            return user;
+      }
+      return null;
    }
 
    public static int followUser(User u, String usernameToFollow) {
@@ -305,8 +310,7 @@ public class ServerManager {
    }
 
    public static void shutdown() {
-      for (SocketChannel cc : usersLogged.keySet())
-         logout(cc);
+      usersLogged.clear();
       r1.stop();
       database.saveDatabaseToFile();
    }

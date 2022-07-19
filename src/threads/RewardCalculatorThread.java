@@ -42,7 +42,7 @@ public class RewardCalculatorThread implements Runnable {
                double authorReward = round((reward * ServerSettings.authorPercentage) / 100, 1);
                if (authorReward > 0)
                   ServerManager.findUserByUsername(p.getAuthor()).addToWincoinList(reward);
-               if (likers.size()>0) {
+               if (likers.size()>0) { //evitare la divisione per zero!
                   double othersReward = round((reward - authorReward) / likers.size(), 1);
                   for (String username : likers) {
                      User u = ServerManager.findUserByUsername(username);
@@ -85,22 +85,21 @@ public class RewardCalculatorThread implements Runnable {
       int likersCounter = 0, dislikersCounter = 0;
       Set<String> keys = p.getLikersList().keySet(); // prendo tutti i liker dell'post
       for (String key : keys) {
-         if (isAfterLastUpdate(p.getLikersList().get(key))) { // se l'utente ha likeato il post entro le date dell'ultimo
+         if (isAfterLastUpdate(p.getLikersList().get(key))) { // se l'utente ha messo like al post entro le date dell'ultimo
                                                            // aggiornamento lo aggiungo al set e aumento il contatore di
                                                            // likes
             likersCounter++;
             set.add(key);
          }
       }
-      System.out.println("Ci sono likes: " + likersCounter);
 
       keys = p.getDislikersList().keySet(); // prendo tutti i disliker dell'post
       for (String key : keys) {
-         if (isAfterLastUpdate(p.getDislikersList().get(key))) { // faccio la stessa cosa per i disliker
+         if (isAfterLastUpdate(p.getDislikersList().get(key))) { // faccio la stessa cosa per i disliker, ma non li aggiungo
+                                                              // al set perché i dislike non devono essere ricompensati
             dislikersCounter++;
          }
       }
-      System.out.println("Ci sono dislikes: " + dislikersCounter);
 
       double n1 = getn1(likersCounter, dislikersCounter);
       HashMap<String, Integer> map = commentCounter(p, set); // conto quanti commenti ha fatto ogni utente
@@ -128,7 +127,8 @@ public class RewardCalculatorThread implements Runnable {
 
    private HashMap<String, Integer> commentCounter(Post p, HashSet<String> set) {
       //Metodo per contare quanti commenti ha fatto ogni utente in quel post
-      HashMap<String, Integer> map = new HashMap<>(p.getCommentsList().size());
+      HashMap<String, Integer> map = new HashMap<>(p.getCommentsList().size()); // creo una map per contenere l'username e
+                                                                                // il numero di commenti
       for (Comment c : p.getCommentsList()) {
          if (isAfterLastUpdate(c.getTimestamp())) {
 
