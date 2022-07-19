@@ -1,4 +1,5 @@
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,12 +14,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
 import java.util.Scanner;
-
-import RMI.CallbackService;
-import RMI.ClientNotifier;
-import RMI.ServerRemoteInterface;
-import settings.ClientSettings;
-import utils.ClientMulticastThread;
 
 public class ClientMain {
     private static ByteBuffer buffer;
