@@ -247,10 +247,10 @@ public class ServerRequestHandler implements Runnable {
    }
 
    private String viewBlog(User u) {
-      int numPostsToShow = 10;
+      int numPostsToShow = 50;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.viewBlog(u).iterator();
-      msg.append("< ID");
+      msg.append(" ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");
       msg.append("Autore");
@@ -277,6 +277,7 @@ public class ServerRequestHandler implements Runnable {
          for (int j = 0; j < columnSize - currentPost.getAuthor().length(); j++)
             msg.append(" ");
          msg.append("|" + currentPost.getTitle().toString());
+         msg.append("\n");
       }
       return msg.toString();
 
@@ -284,6 +285,8 @@ public class ServerRequestHandler implements Runnable {
 
    private String commentPost(User u, String clientRequest) {
       String[] split = ServerUtils.fixArray(clientRequest);
+      if (split.length != 2 || split[0].trim().isEmpty() || split[1].trim().isEmpty())
+         return "L'input non è corretto!";
       String comment = split[1];
       int idPost = Integer.parseInt(split[0]);
       switch (ServerManager.addComment(u, ServerManager.getPostByID(idPost), comment)) {
@@ -466,7 +469,7 @@ public class ServerRequestHandler implements Runnable {
       int numPostsToShow = 10;
       StringBuilder msg = new StringBuilder();
       Iterator<Post> itr = ServerManager.showFeed(u).iterator();
-      msg.append("ID");
+      msg.append(" ID");
       for (int i = 0; i < columnSize - 2; i++)
          msg.append(" ");
       msg.append("Autore");

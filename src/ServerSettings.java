@@ -79,7 +79,7 @@ public class ServerSettings {
       RMIName = "ServerRemoteInterface";
 
       authorPercentage = 50;
-      storagePath = "/tmp";
+      storagePath = "tmp";
       rewardDelayTime = "30s";
       autoSaveTime = "30s";
    }
